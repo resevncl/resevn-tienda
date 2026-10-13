@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RESEVN — Finalizar compra</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="styles.css?v=1791909634">
+</head>
+<body class="pagina-pago">
+
+  <header class="header">
+    <div class="header-fila">
+      <a class="logo" href="./" id="logo"><img id="logo-img" alt="" hidden><span id="logo-texto" data-tienda></span></a>
+      <span class="pago-seguro">Pago seguro</span>
+    </div>
+  </header>
+
+  <main class="pago">
+    <a class="pago-volver" href="./">← Seguir comprando</a>
+    <h1>Finalizar compra</h1>
+
+    <p class="pago-vacio" id="pago-vacio" hidden>Tu carrito está vacío. <a class="enlace" href="./#todo">Ver poleras</a></p>
+
+    <div class="pago-columnas" id="pago-columnas" hidden>
+      <form class="pago-form" id="pago-form" autocomplete="on">
+        <section>
+          <h2><span>1</span> Contacto</h2>
+          <label>Correo<input id="pg-email" name="email" type="email" autocomplete="email" inputmode="email" required maxlength="120" placeholder="tucorreo@ejemplo.com"></label>
+          <label>Teléfono<input id="pg-telefono" name="tel" type="tel" autocomplete="tel" required minlength="8" maxlength="20" placeholder="+56 9 1234 5678"></label>
+          <p class="pago-nota">Te escribimos a este correo con el seguimiento de tu pedido.</p>
+        </section>
+
+        <section>
+          <h2><span>2</span> Entrega</h2>
+          <label>Nombre y apellido<input id="pg-nombre" name="name" autocomplete="name" required maxlength="80"></label>
+          <label>Dirección<input id="pg-direccion" name="address" autocomplete="address-line1" required maxlength="100" placeholder="Calle y número"></label>
+          <label>Depto, casa o referencia (opcional)<input id="pg-depto" name="address2" autocomplete="address-line2" maxlength="38"></label>
+          <div class="pago-par">
+            <label>Región<select id="pg-region" name="region" autocomplete="address-level1" required>
+              <option value="">Elige tu región</option>
+              <option>Arica y Parinacota</option><option>Tarapacá</option><option>Antofagasta</option><option>Atacama</option>
+              <option>Coquimbo</option><option>Valparaíso</option><option>Metropolitana de Santiago</option><option>O'Higgins</option>
+              <option>Maule</option><option>Ñuble</option><option>Biobío</option><option>La Araucanía</option>
+              <option>Los Ríos</option><option>Los Lagos</option><option>Aysén</option><option>Magallanes</option>
+            </select></label>
+            <label>Comuna<input id="pg-comuna" name="comuna" autocomplete="address-level2" required maxlength="60"></label>
+          </div>
+        </section>
+
+        <section>
+          <h2><span>3</span> Envío</h2>
+          <div class="pago-opcion">
+            <div><b>Despacho a domicilio</b><small id="pago-plazo"></small></div>
+            <b id="pago-envio"></b>
+          </div>
+          <p class="pago-nota" id="pago-envio-nota" hidden></p>
+        </section>
+
+        <section>
+          <h2><span>4</span> Pago</h2>
+          <div class="pago-opcion">
+            <div><b>Mercado Pago</b><small>Tarjeta de crédito, débito o tu cuenta de Mercado Pago</small></div>
+          </div>
+          <p class="pago-nota">Al continuar pasas a la página segura de Mercado Pago para pagar. Esta tienda no ve ni guarda los datos de tu tarjeta.</p>
+        </section>
+
+        <p class="detalle-error" id="pago-error" role="alert" hidden></p>
+        <button class="boton boton-oscuro" id="pago-confirmar" type="submit">Pagar</button>
+        <p class="pago-nota">Al pagar aceptas las <a class="enlace" href="politicas.html" target="_blank" rel="noopener">políticas de la tienda</a>: cambios, devoluciones y envíos.</p>
+      </form>
+
+      <aside class="pago-resumen" aria-labelledby="pago-resumen-titulo">
+        <h2 id="pago-resumen-titulo">Tu pedido</h2>
+        <div id="pago-items"></div>
+        <dl class="carrito-totales" id="pago-totales"></dl>
+        <a class="pago-editar" href="./">Modificar el carrito</a>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
+  </footer>
+
+  <script src="config.js?v=1791909634"></script>
+  <script>
+    (function () {
+      var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
+      document.querySelectorAll("[data-tienda]").forEach(function (el) { el.textContent = C.nombreTienda; });
+      if (C.logo) {
+        $("logo-img").src = C.logo; $("logo-img").hidden = false;
+        if (C.logoComoInicial) { $("logo-texto").textContent = C.nombreTienda.slice(1); $("logo").setAttribute("aria-label", C.nombreTienda); }
+      }
+      $("anio").textContent = new Date().getFullYear();
+
+      // Sin pago en línea configurado, esta página no tiene nada que hacer
+      if (!(C.pago && C.pago.url)) { location.replace("./"); return; }
+
+      var plata = function (n) { return "$" + Math.round(Number(n) || 0).toLocaleString("es-CL"); };
+      var crear = function (tag, clase, texto) { var el = document.createElement(tag); if (clase) el.className = clase; if (texto != null) el.textContent = texto; return el; };
+      var miniatura = function (ruta) { return String(ruta || "").replace(/^img\//, "img/min/"); };
+      var ENVIO = C.envio || null;
+
+      var carrito = [];
+      try { carrito = JSON.parse(localStorage.getItem("resevn-carrito") || "[]") || []; } catch (e) { carrito = []; }
+      if (!Array.isArray(carrito)) carrito = [];
+
+      function pintar(productos) {
+        var ls = carrito.map(function (l) {
+          var p = productos.find(function (x) { return x.id === l.id && x.visible !== false; });
+          if (!p || !(Number(p.precio) > 0)) return null;
+          var vs = p.variantes && p.variantes.length ? p.variantes : [{ color: (p.colores || []).join(" / "), imagenes: p.imagenes }];
+          return { l: l, p: p, v: vs[l.color] || vs[0], precio: Number(p.precio), cant: Math.max(1, Math.floor(Number(l.cant)) || 1) };
+        }).filter(Boolean);
+        if (!ls.length) { $("pago-vacio").hidden = false; return; }
+
+        var subtotal = ls.reduce(function (a, x) { return a + x.precio * x.cant; }, 0);
+        var elegibles = ls.reduce(function (a, x) { return a + (C.promo && x.p.sinPromo !== true && x.precio === C.promo.precioUnidad ? x.cant : 0); }, 0);
+        var descuento = C.promo ? Math.floor(elegibles / 2) * Math.max(0, 2 * C.promo.precioUnidad - C.promo.precioPar) : 0;
+        var gratis = !ENVIO || subtotal - descuento >= ENVIO.gratisDesde;
+        var envio = gratis || !ENVIO ? 0 : ENVIO.costo;
+        var total = subtotal - descuento + envio;
+
+        $("pago-items").replaceChildren.apply($("pago-items"), ls.map(function (x) {
+          var fila = crear("article", "carrito-item");
+          var img = crear("img"); img.src = miniatura((x.v.imagenes && x.v.imagenes[0]) || x.p.imagenes[0]); img.alt = "";
+          var info = crear("div", "carrito-info");
+          info.append(crear("p", "carrito-nombre", x.p.nombre),
+            crear("p", "carrito-detalle", [x.v.color, x.l.talla && "Talla " + x.l.talla, "Cantidad " + x.cant].filter(Boolean).join(" · ")));
+          fila.append(img, info, crear("p", "carrito-precio", plata(x.precio * x.cant)));
+          return fila;
+        }));
+
+        var fila = function (dt, dd, clase) { var d = crear("div", clase || ""); d.append(crear("dt", "", dt), crear("dd", "", dd)); return d; };
+        $("pago-totales").replaceChildren.apply($("pago-totales"), [
+          fila("Subtotal", plata(subtotal)),
+          descuento ? fila("Promo 2 x " + plata(C.promo.precioPar), "−" + plata(descuento)) : null,
+          fila("Envío", gratis ? "Gratis" : plata(envio)),
+          fila("Total", plata(total), "carrito-total"),
+        ].filter(Boolean));
+
+        $("pago-envio").textContent = gratis ? "Gratis" : plata(envio);
+        $("pago-plazo").textContent = C.notaEntrega ? "Entrega estimada de 1 a 2 semanas" : "";
+        if (ENVIO && !gratis) {
+          $("pago-envio-nota").textContent = "El envío es gratis en compras desde " + plata(ENVIO.gratisDesde) + (C.promo ? ": por ejemplo, llevando 2 poleras de " + plata(C.promo.precioUnidad) + " por " + plata(C.promo.precioPar) + "." : ".");
+          $("pago-envio-nota").hidden = false;
+        }
+        $("pago-confirmar").textContent = "Pagar " + plata(total);
+        $("pago-confirmar").dataset.texto = "Pagar " + plata(total);
+        $("pago-columnas").hidden = false;
+      }
+
+      var ERRORES = {
+        faltan_datos: "Completa tu correo, teléfono, nombre, dirección, región y comuna.",
+        email_invalido: "Revisa el correo: parece estar mal escrito.",
+        producto_no_disponible: "Una de las poleras del carrito ya no está disponible. Vuelve al carrito, quítala e inténtalo de nuevo.",
+        talla_invalida: "Una de las tallas del carrito no está disponible. Vuelve al carrito y revísala.",
+        carrito_vacio: "Tu carrito está vacío.",
+      };
+
+      $("pago-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var err = $("pago-error"), boton = $("pago-confirmar");
+        var valor = function (id) { return $(id).value.trim(); };
+        err.hidden = true;
+        boton.disabled = true;
+        boton.textContent = "Abriendo Mercado Pago…";
+        var fallo = function (texto) { err.textContent = texto; err.hidden = false; boton.disabled = false; boton.textContent = boton.dataset.texto || "Pagar"; err.scrollIntoView({ block: "center" }); };
+        fetch(C.pago.url.replace(/\/$/, "") + "/crear-pago", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: carrito.map(function (l) { return { id: l.id, color: l.color, talla: l.talla, cant: l.cant }; }),
+            cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"),
+              direccion: valor("pg-direccion") + (valor("pg-depto") ? ", " + valor("pg-depto") : ""), comuna: valor("pg-comuna"), region: valor("pg-region") },
+          }),
+        }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (x) {
+            if (x.ok && x.d.url) { location.href = x.d.url; return; }
+            fallo(ERRORES[x.d.error] || "No pudimos iniciar el pago. Inténtalo de nuevo en un momento o escríbenos.");
+          })
+          .catch(function () { fallo("No pudimos conectar con el servicio de pago. Revisa tu conexión e inténtalo de nuevo."); });
+      });
+
+      // Al volver desde Mercado Pago con el botón "atrás", el botón debe quedar usable
+      window.addEventListener("pageshow", function () { var b = $("pago-confirmar"); b.disabled = false; if (b.dataset.texto) b.textContent = b.dataset.texto; });
+
+      if (!carrito.length) { $("pago-vacio").hidden = false; return; }
+      fetch("products.json").then(function (r) { return r.json(); }).then(pintar)
+        .catch(function () { $("pago-vacio").textContent = "No pudimos cargar tu pedido. Recarga la página."; $("pago-vacio").hidden = false; });
+    })();
+  </script>
+</body>
+</html>

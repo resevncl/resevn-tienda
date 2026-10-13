@@ -459,73 +459,30 @@
     // Con pago en línea no se ofrece comprar por WhatsApp; sin él, es la única forma de pedir
     pedir.hidden = !t.ls.length || conPago;
     if (t.ls.length) pedir.href = linkWhatsapp(mensajePedido(t));
-    if (!t.ls.length) pasoCarrito("lista");
-    else pasoCarrito($("carrito-datos").hidden ? "lista" : "datos");
+    pasoCarrito();
   }
 
   // ---------- Pago en línea ----------
   // Solo se activa si config.js tiene la dirección del servicio de pagos (pago.url).
   const conPago = !!(C.pago && C.pago.url);
 
-  // El carrito tiene dos pasos: "lista" (las poleras) y "datos" (entrega y pago)
-  function pasoCarrito(paso) {
-    const hay = carrito.length > 0, datos = paso === "datos" && hay && conPago;
-    $("carrito-datos").hidden = !datos;
-    $("carrito-lista").hidden = datos;
-    $("carrito-pagar").hidden = !(conPago && hay) || datos;
-    $("carrito-confirmar").hidden = !datos;
+  // El pago se hace en comprar.html: el carrito solo muestra el botón para ir ahí
+  function pasoCarrito() {
+    const hay = carrito.length > 0;
+    $("carrito-pagar").hidden = !(conPago && hay);
     $("carrito-nota").hidden = conPago || !hay;
-    $("carrito-seguir").textContent = datos ? "Volver al carrito" : hay ? "Seguir comprando" : "Ver poleras";
+    $("carrito-seguir").textContent = hay ? "Seguir comprando" : "Ver poleras";
     $("carrito-seguir").className = "boton " + (hay ? "boton-borde" : "boton-oscuro");
-    $("carrito-titulo").textContent = datos ? "Finalizar compra" : "Carrito";
-    if (!datos) $("carrito-error").hidden = true;
   }
-
-  const ERRORES_PAGO = {
-    faltan_datos: "Completa tu nombre, teléfono, dirección y comuna.",
-    email_invalido: "Revisa el correo: parece estar mal escrito.",
-    producto_no_disponible: "Una de las poleras del carrito ya no está disponible. Quítala e inténtalo de nuevo.",
-    talla_invalida: "Una de las tallas del carrito no está disponible. Revísala e inténtalo de nuevo.",
-    carrito_vacio: "Tu carrito está vacío.",
-  };
-
-  $("carrito-pagar").addEventListener("click", () => { pasoCarrito("datos"); $("pg-nombre").focus(); });
-  $("carrito-datos").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const err = $("carrito-error"), boton = $("carrito-confirmar");
-    err.hidden = true;
-    boton.disabled = true;
-    boton.textContent = "Abriendo Mercado Pago…";
-    const valor = (id) => $(id).value.trim();
-    try {
-      const r = await fetch(C.pago.url.replace(/\/$/, "") + "/crear-pago", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: carrito.map((l) => ({ id: l.id, color: l.color, talla: l.talla, cant: l.cant })),
-          cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"), direccion: valor("pg-direccion"), comuna: valor("pg-comuna"), region: valor("pg-region") },
-        }),
-      });
-      const datos = await r.json().catch(() => ({}));
-      if (r.ok && datos.url) { location.href = datos.url; return; }
-      err.textContent = ERRORES_PAGO[datos.error] || "No pudimos iniciar el pago. Inténtalo de nuevo en un momento o escríbenos.";
-    } catch (x) {
-      err.textContent = "No pudimos conectar con el servicio de pago. Revisa tu conexión o escríbenos.";
-    }
-    err.hidden = false;
-    boton.disabled = false;
-    boton.textContent = "Pagar con Mercado Pago";
-  });
 
   function mostrarCarrito(ver) {
     $("carrito").hidden = !ver;
     document.body.classList.toggle("sin-scroll", ver || !$("detalle").hidden);
-    if (ver) { $("carrito-datos").hidden = true; pintarCarrito(); $("carrito-lista").scrollTop = 0; $("cerrar-carrito").focus(); }
+    if (ver) { pintarCarrito(); $("carrito-lista").scrollTop = 0; $("cerrar-carrito").focus(); }
   }
   $("abrir-carrito").addEventListener("click", () => mostrarCarrito(true));
   $("cerrar-carrito").addEventListener("click", () => mostrarCarrito(false));
   $("carrito-seguir").addEventListener("click", () => {
-    if (!$("carrito-datos").hidden) return pasoCarrito("lista");
     const vacio = !carrito.length;
     mostrarCarrito(false);
     if (vacio) location.hash = "#todo";
