@@ -37,8 +37,8 @@ window.CONFIG = {
   envio: { costo: 4990, gratisDesde: 49990 },
 
   // Pago en línea con Mercado Pago. "url" es la dirección del servicio de pagos
-  // (ej: "https://pagos.resevn.cl"). Mientras esté vacío, el sitio solo vende por WhatsApp.
-  pago: { url: "" },
+  // (ej: "https://pagos.resevn.cl"). Si se deja vacío (""), el sitio vuelve a vender solo por WhatsApp.
+  pago: { url: "https://pagos.resevn.cl" },
 
   // Plazo de entrega: se muestra en el detalle de cada polera y en el footer. "" = no mostrar.
   notaEntrega: "Productos por encargo · Entrega estimada de 1 a 2 semanas",
