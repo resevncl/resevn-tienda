@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791929989">
+  <link rel="stylesheet" href="styles.css?v=1791930092">
 </head>
 <body class="pagina-pago">
 
@@ -31,6 +31,7 @@
           <label>Correo<input id="pg-email" name="email" type="email" autocomplete="email" inputmode="email" required maxlength="120" placeholder="tucorreo@ejemplo.com"></label>
           <label>Teléfono<input id="pg-telefono" name="tel" type="tel" autocomplete="tel" required minlength="8" maxlength="20" placeholder="+56 9 1234 5678"></label>
           <p class="pago-nota">Te escribimos a este correo con el seguimiento de tu pedido.</p>
+          <label class="opinar-permiso"><input id="pg-novedades" type="checkbox"><span>Quiero recibir novedades y ofertas de RESEVN por correo.</span></label>
         </section>
 
         <section>
@@ -61,10 +62,12 @@
 
         <section>
           <h2><span>4</span> Pago</h2>
-          <div class="pago-opcion">
-            <div><b>Mercado Pago</b><small>Tarjeta de crédito, débito o tu cuenta de Mercado Pago</small></div>
+          <p class="pago-nota">Todas las transacciones son seguras y están encriptadas.</p>
+          <div class="pago-opcion pago-medio">
+            <div><b>Tarjeta de crédito, débito o prepago</b><small>Pago procesado por Mercado Pago. No necesitas tener cuenta.</small></div>
+            <ul class="pago-marcas" aria-label="Tarjetas aceptadas"><li>Visa</li><li>Mastercard</li><li>Amex</li><li>Débito</li></ul>
           </div>
-          <p class="pago-nota">Al continuar pasas a la página segura de Mercado Pago para pagar. Esta tienda no ve ni guarda los datos de tu tarjeta.</p>
+          <p class="pago-nota">Al tocar "Pagar" pasas a la página segura de Mercado Pago para ingresar tu tarjeta. Esta tienda no ve ni guarda esos datos.</p>
         </section>
 
         <p class="detalle-error" id="pago-error" role="alert" hidden></p>
@@ -85,8 +88,8 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1791929989"></script>
-  <script src="comunas.js?v=1791929989"></script>
+  <script src="config.js?v=1791930092"></script>
+  <script src="comunas.js?v=1791930092"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -185,7 +188,7 @@
           body: JSON.stringify({
             items: carrito.map(function (l) { return { id: l.id, color: l.color, talla: l.talla, cant: l.cant }; }),
             cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"),
-              direccion: valor("pg-direccion") + (valor("pg-depto") ? ", " + valor("pg-depto") : ""), comuna: valor("pg-comuna"), region: valor("pg-region") },
+              direccion: valor("pg-direccion") + (valor("pg-depto") ? ", " + valor("pg-depto") : ""), comuna: valor("pg-comuna"), region: valor("pg-region"), novedades: $("pg-novedades").checked },
           }),
         }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
           .then(function (x) {
