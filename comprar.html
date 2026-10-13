@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791929798">
+  <link rel="stylesheet" href="styles.css?v=1791929989">
 </head>
 <body class="pagina-pago">
 
@@ -46,7 +46,7 @@
               <option>Maule</option><option>Ñuble</option><option>Biobío</option><option>La Araucanía</option>
               <option>Los Ríos</option><option>Los Lagos</option><option>Aysén</option><option>Magallanes</option>
             </select></label>
-            <label>Comuna<input id="pg-comuna" name="comuna" autocomplete="address-level2" required maxlength="60"></label>
+            <label>Comuna<select id="pg-comuna" name="comuna" autocomplete="address-level2" required disabled><option value="">Primero elige tu región</option></select></label>
           </div>
         </section>
 
@@ -85,7 +85,8 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1791929798"></script>
+  <script src="config.js?v=1791929989"></script>
+  <script src="comunas.js?v=1791929989"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -152,6 +153,15 @@
         $("pago-confirmar").dataset.texto = "Pagar " + plata(total);
         $("pago-columnas").hidden = false;
       }
+
+      // Las comunas dependen de la región elegida
+      $("pg-region").addEventListener("change", function () {
+        var lista = (window.COMUNAS || {})[$("pg-region").value] || [], sel = $("pg-comuna");
+        sel.replaceChildren(crear("option", "", lista.length ? "Elige tu comuna" : "Primero elige tu región"));
+        sel.firstChild.value = "";
+        lista.forEach(function (c) { sel.appendChild(crear("option", "", c)); });
+        sel.disabled = !lista.length;
+      });
 
       var ERRORES = {
         faltan_datos: "Completa tu correo, teléfono, nombre, dirección, casa o depto, región y comuna.",
