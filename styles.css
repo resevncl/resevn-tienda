@@ -303,7 +303,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #opinar-gracias { display: grid; gap: 18px; justify-items: start; }
 .pago-form textarea { font: inherit; font-size: 16px; text-transform: none; letter-spacing: 0; color: var(--negro); border: 1px solid var(--linea); border-radius: 0; padding: 12px; width: 100%; resize: vertical; }
 .pago-form textarea:focus { border-color: var(--negro); outline: none; }
-.estrellas { border: 0; padding: 0; margin: 0; }
+.estrellas { border: 0; padding: 0; margin: 0; min-width: 0; }
 .estrellas legend { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gris); margin-bottom: 4px; }
 .estrellas div { display: flex; gap: 4px; }
 .estrellas label { position: relative; display: block; cursor: pointer; }
