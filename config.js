@@ -46,7 +46,7 @@ window.CONFIG = {
   // Preguntas frecuentes: p = pregunta, r = respuesta
   preguntas: [
     { p: "¿Cómo compro?",
-      r: "Elige tu polera, talla y color, y toca “Consultar por WhatsApp” o “Consultar por Instagram”. Te confirmamos disponibilidad y coordinamos el pago y la entrega por ahí." },
+      r: "Elige tu polera, talla y color. Luego toca “Consultar por WhatsApp” o “Consultar por Instagram”: te confirmamos disponibilidad, forma de pago y entrega." },
     { p: "¿Cuánto demora en llegar?",
       r: "Trabajamos por encargo. La entrega estimada es de 1 a 2 semanas desde que confirmas tu pedido." },
     { p: "¿Hacen envíos a todo Chile?",
