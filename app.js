@@ -39,8 +39,28 @@
   // Abre el chat directo (DM) de Instagram; Instagram no permite prellenar el mensaje
   $("detalle-instagram").href = "https://ig.me/m/" + C.instagram.replace(/^@/, "");
 
-  if (C.aviso) {
-    ["aviso-promo", "detalle-promo"].forEach((id) => { $(id).textContent = C.aviso; $(id).hidden = false; });
+  if (C.aviso) { $("aviso-promo").textContent = C.aviso; $("aviso-promo").hidden = false; }
+
+  // La promo 2x aplica solo a las poleras con el precio indicado en config.js
+  const enPromo = (p) => !!C.promo && p.sinPromo !== true && Number(p.precio) === Number(C.promo.precioUnidad);
+
+  // ---------- Reseñas y preguntas frecuentes ----------
+  if (C.resenas && C.resenas.length) {
+    $("lista-resenas").replaceChildren(...C.resenas.map((r) => {
+      const caja = crear("figure", "resena");
+      caja.append(crear("blockquote", "", r.texto));
+      caja.append(crear("figcaption", "", [r.nombre, r.polera, r.fecha].filter(Boolean).join(" · ")));
+      return caja;
+    }));
+    $("resenas").hidden = false;
+  }
+  if (C.preguntas && C.preguntas.length) {
+    $("lista-preguntas").replaceChildren(...C.preguntas.map((q) => {
+      const d = crear("details", "pregunta");
+      d.append(crear("summary", "", q.p), crear("p", "", q.r));
+      return d;
+    }));
+    $("preguntas").hidden = false;
   }
 
   if (C.notaEntrega) {
@@ -70,6 +90,7 @@
       img.decoding = "async";
       foto.append(img);
     });
+    if (enPromo(p)) foto.append(crear("span", "tarjeta-promo", C.promo.etiqueta));
     boton.append(foto);
     if (p.marca) boton.append(crear("p", "tarjeta-marca", p.marca));
     boton.append(crear("p", "tarjeta-nombre", nombreCorto(p)));
@@ -120,9 +141,11 @@
       });
       return b;
     };
-    const contacto = crear("a", "", "Contacto");
-    contacto.href = "#contacto";
-    $("menu").replaceChildren(enlace("Todo", null), ...marcas().map((m) => enlace(m, m)), contacto);
+    const ancla = (texto, id) => { const a = crear("a", "", texto); a.href = "#" + id; return a; };
+    const extras = [];
+    if (C.resenas && C.resenas.length) extras.push(ancla("Reseñas", "resenas"));
+    if (C.preguntas && C.preguntas.length) extras.push(ancla("Preguntas", "preguntas"));
+    $("menu").replaceChildren(enlace("Todo", null), ...marcas().map((m) => enlace(m, m)), ...extras, ancla("Contacto", "contacto"));
   }
 
   function pintarBanner() {
@@ -202,7 +225,8 @@
     $("detalle-precio").textContent = precio;
     $("detalle-precio").hidden = !precio;
     // "sinPromo": true en products.json oculta el aviso de promoción en esa polera
-    $("detalle-promo").hidden = !C.aviso || p.sinPromo === true;
+    $("detalle-promo").textContent = enPromo(p) ? C.promo.detalle : "";
+    $("detalle-promo").hidden = !enPromo(p);
     chips("detalle-tallas", p.tallas);
 
     const colores = $("detalle-colores");

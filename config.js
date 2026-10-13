@@ -20,15 +20,46 @@ window.CONFIG = {
   // Mensaje prellenado de WhatsApp. {nombre} se reemplaza por el nombre de la polera
   mensajeWhatsapp: "Hola! Quiero consultar por la polera: {nombre}",
 
-  // Aviso de promoción: franja negra arriba del sitio y línea bajo el precio de cada polera.
-  // Déjalo en "" para no mostrar nada.
-  aviso: "2 poleras por $49.990 · Envío incluido",
+  // Franja negra arriba del sitio, para un aviso general. "" = no mostrar nada.
+  aviso: "",
+
+  // Promoción 2x: aplica solo a las poleras cuyo precio es "precioUnidad"
+  // (y que no tengan "sinPromo": true en products.json). null = sin promoción.
+  promo: {
+    precioUnidad: 26990,
+    etiqueta: "2 x $49.990",
+    detalle: "Promo: lleva 2 poleras de $26.990 por $49.990 · Envío incluido",
+  },
 
   // Plazo de entrega: se muestra en el detalle de cada polera y en el footer. "" = no mostrar.
   notaEntrega: "Productos por encargo · Entrega estimada de 1 a 2 semanas",
 
   // Guía de tallas: se agrega sola como última foto de todas las poleras. null = no mostrar.
   guiaTallas: "img/guia-de-tallas.webp",
+
+  // Reseñas de clientes. Solo reseñas reales: copia lo que te escribió el cliente.
+  // Mientras la lista esté vacía, la sección no se muestra.
+  // Formato: { nombre: "Camila R.", texto: "Llegó antes de lo esperado…", polera: "Hellstar Logo", fecha: "Octubre 2026" },
+  resenas: [
+  ],
+
+  // Preguntas frecuentes: p = pregunta, r = respuesta
+  preguntas: [
+    { p: "¿Cómo compro?",
+      r: "Elige tu polera, talla y color, y toca “Consultar por WhatsApp” o “Consultar por Instagram”. Te confirmamos disponibilidad y coordinamos el pago y la entrega por ahí." },
+    { p: "¿Cuánto demora en llegar?",
+      r: "Trabajamos por encargo. La entrega estimada es de 1 a 2 semanas desde que confirmas tu pedido." },
+    { p: "¿Hacen envíos a todo Chile?",
+      r: "Sí, despachamos a todo Chile. Llevando 2 poleras en promoción el envío va incluido. Para 1 polera, coordinamos contigo el despacho o la entrega en persona." },
+    { p: "¿Cómo funciona la promo 2 x $49.990?",
+      r: "Aplica al llevar 2 poleras de $26.990: pagas $49.990 por las dos, con envío incluido. Puedes combinar modelos, tallas y colores. Las poleras con otro precio no entran en la promoción." },
+    { p: "¿Qué talla elijo?",
+      r: "Las poleras son de corte oversize y vienen en S, M, L y XL. En cada polera, la última foto es la guía de tallas con las medidas en centímetros. Si tienes dudas, escríbenos y te ayudamos a elegir." },
+    { p: "¿Qué pasa si mi polera llega con una falla?",
+      r: "Escríbenos apenas la recibas, con una foto, y lo solucionamos." },
+    { p: "¿Tienes otra duda?",
+      r: "Escríbenos por WhatsApp o Instagram con los botones de más abajo y te respondemos." },
+  ],
 
   // Texto del banner principal
   bannerTitulo: "NUEVA COLECCIÓN",

@@ -108,6 +108,23 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .aviso { text-align: center; color: var(--gris); padding: 48px 0; }
 
 /* ---------- Footer ---------- */
+/* ---------- Reseñas y preguntas frecuentes ---------- */
+.extra { max-width: 860px; margin: 0 auto; padding: 0 var(--margen) 64px; scroll-margin-top: 110px; }
+.extra h2 { font-size: 18px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 20px; }
+.resenas { display: grid; gap: 12px; }
+.resena { border: 1px solid var(--linea); padding: 18px; }
+.resena blockquote { font-size: 15px; line-height: 1.5; }
+.resena figcaption { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gris); margin-top: 10px; }
+.pregunta { border-top: 1px solid var(--linea); }
+.pregunta:last-child { border-bottom: 1px solid var(--linea); }
+.pregunta summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.pregunta summary::-webkit-details-marker { display: none; }
+.pregunta summary::after { content: "+"; font-size: 18px; font-weight: 400; line-height: 1; }
+.pregunta[open] summary::after { content: "−"; }
+.pregunta p { font-size: 14px; line-height: 1.55; color: var(--gris); padding: 0 0 18px; max-width: 65ch; }
+.tarjeta-promo { position: absolute; left: 8px; top: 8px; z-index: 1; background: var(--negro); color: var(--blanco); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 4px 7px; }
+@media (min-width: 700px) { .resenas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 .footer { border-top: 1px solid var(--linea); text-align: center; padding: 48px var(--margen); }
 .footer-logo { font-size: 15px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 20px; }
 .footer-links { display: flex; justify-content: center; gap: 28px; margin-bottom: 20px; }
