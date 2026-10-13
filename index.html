@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791855715">
+  <link rel="stylesheet" href="styles.css?v=1791861256">
 </head>
 <body>
 
@@ -94,7 +94,7 @@
         <p class="detalle-precio" id="detalle-precio" hidden></p>
         <p class="detalle-promo" id="detalle-promo" hidden></p>
         <div class="detalle-grupo" id="detalle-tallas" hidden>
-          <h3>Talla: <span id="detalle-talla-actual"></span></h3>
+          <h3>Talla: <span id="detalle-talla-actual"></span><button type="button" class="detalle-guia" id="detalle-guia" hidden>Guía de tallas</button></h3>
           <ul class="chips"></ul>
         </div>
         <div class="detalle-grupo" id="detalle-colores" hidden>
@@ -110,6 +110,7 @@
           <a class="boton boton-borde" id="detalle-instagram" target="_blank" rel="noopener">Instagram</a>
         </div>
         <p class="detalle-entrega" data-entrega hidden></p>
+        <div class="detalle-secciones" id="detalle-secciones"></div>
       </div>
     </div>
   </div>
@@ -125,7 +126,17 @@
         <p id="carrito-promo-texto"></p>
         <div class="carrito-barra"><span id="carrito-barra"></span></div>
       </div>
-      <div class="carrito-lista" id="carrito-lista"></div>
+      <div class="carrito-lista" id="carrito-lista">
+        <div id="carrito-items"></div>
+        <details class="carrito-comentario" id="carrito-comentario-caja" hidden>
+          <summary>Agregar comentarios a tu pedido</summary>
+          <textarea id="carrito-comentario" maxlength="200" rows="2" aria-label="Comentarios del pedido" placeholder="Referencia de la dirección, horario de entrega, etc."></textarea>
+        </details>
+        <section class="carrito-sugeridas" id="carrito-sugeridas" hidden>
+          <h3 id="carrito-sugeridas-titulo"></h3>
+          <div class="sugeridas" id="carrito-sugeridas-lista"></div>
+        </section>
+      </div>
       <form class="carrito-datos" id="carrito-datos" autocomplete="on" hidden>
         <p class="carrito-paso">Datos de entrega</p>
         <label>Nombre y apellido<input id="pg-nombre" name="name" autocomplete="name" required maxlength="80"></label>
@@ -134,7 +145,6 @@
         <label>Dirección<input id="pg-direccion" name="address" autocomplete="street-address" required maxlength="140" placeholder="Calle, número, depto"></label>
         <label>Comuna<input id="pg-comuna" name="comuna" autocomplete="address-level2" required maxlength="60"></label>
         <label>Región<input id="pg-region" name="region" autocomplete="address-level1" maxlength="60"></label>
-        <label>Nota (opcional)<input id="pg-nota" name="nota" maxlength="200" placeholder="Referencia, horario, etc."></label>
         <p class="carrito-nota">Usamos estos datos solo para entregar tu pedido. El pago se hace en Mercado Pago; esta página no ve ni guarda los datos de tu tarjeta.</p>
       </form>
       <div class="carrito-pie">
@@ -149,7 +159,7 @@
     </div>
   </div>
 
-  <script src="config.js?v=1791855715"></script>
-  <script src="app.js?v=1791855715"></script>
+  <script src="config.js?v=1791861256"></script>
+  <script src="app.js?v=1791861256"></script>
 </body>
 </html>

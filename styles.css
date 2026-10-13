@@ -112,6 +112,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .tarjeta-foto-dorso { position: absolute; inset: 0; opacity: 0; transition: opacity .25s; }
 @media (hover: hover) { .tarjeta:hover .tarjeta-foto-dorso { opacity: 1; } }
 .tarjeta-promo { position: absolute; left: 8px; top: 8px; z-index: 1; background: var(--negro); color: var(--blanco); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 4px 7px; }
+.tarjeta-oferta { position: absolute; right: 8px; top: 8px; z-index: 1; background: var(--negro); color: var(--blanco); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 4px 7px; }
+.tarjeta-precio s, .detalle-precio s { font-weight: 400; color: var(--gris); margin-left: 4px; }
+.detalle-oferta { font-size: 11px; font-weight: 700; background: var(--gris-claro); padding: 3px 7px; vertical-align: middle; }
 .tarjeta-marca { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); margin-bottom: 2px; }
 .tarjeta-nombre { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
 .tarjeta-precio { font-size: 13px; font-weight: 700; margin-top: 4px; }
@@ -192,6 +195,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .detalle-dudas { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gris); margin-top: 26px; }
 .detalle-consulta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .detalle-consulta .boton { padding: 12px 8px; font-size: 11px; }
+.detalle-guia { float: right; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--negro); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+.detalle-secciones { margin-top: 28px; }
+.detalle-secciones .pregunta summary { font-size: 12px; padding: 14px 0; }
+.detalle-secciones .pregunta p { font-size: 13px; padding-bottom: 14px; }
 .detalle-entrega { font-size: 11px; letter-spacing: 0.06em; color: var(--gris); text-align: center; margin-top: 16px; }
 
 /* ---------- Carrito ---------- */
@@ -228,6 +235,19 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .resultado-datos dt { color: var(--gris); }
 .resultado-datos dd { font-weight: 700; }
 .resultado-botones { display: grid; gap: 10px; max-width: 360px; margin: 32px auto 0; }
+.carrito-comentario { border-bottom: 1px solid var(--linea); }
+.carrito-comentario summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; padding: 14px 0; font-size: 13px; }
+.carrito-comentario summary::-webkit-details-marker { display: none; }
+.carrito-comentario summary::after { content: "+"; font-size: 18px; line-height: 1; }
+.carrito-comentario[open] summary::after { content: "−"; }
+.carrito-comentario textarea { display: block; width: 100%; font: inherit; font-size: 16px; color: var(--negro); border: 1px solid var(--linea); border-radius: 0; padding: 10px 12px; margin-bottom: 14px; resize: vertical; }
+.carrito-sugeridas { padding: 18px 0 20px; }
+.carrito-sugeridas h3 { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+.sugeridas { display: grid; grid-auto-flow: column; grid-auto-columns: 112px; gap: 10px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.sugerida { display: grid; gap: 3px; align-content: start; }
+.sugerida img { width: 112px; height: 140px; background: var(--gris-claro); margin-bottom: 4px; }
+.sugerida-nombre { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; overflow-wrap: anywhere; line-height: 1.25; }
+.sugerida-precio { font-size: 12px; font-weight: 700; }
 .carrito-pie { border-top: 1px solid var(--linea); padding: 16px var(--margen) 20px; display: grid; gap: 10px; }
 .carrito-totales { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
 .carrito-totales div { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--gris); }

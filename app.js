@@ -46,6 +46,7 @@
   $("link-whatsapp").textContent = "+" + fono.replace(/^(\d{2})(\d)(\d{4})(\d{4})$/, "$1 $2 $3 $4");
   // Abre el chat directo (DM) de Instagram; Instagram no permite prellenar el mensaje
   $("detalle-instagram").href = "https://ig.me/m/" + instagram;
+  $("detalle-guia").hidden = !C.guiaTallas;
   $("anio").textContent = new Date().getFullYear();
 
   if (C.aviso) { $("aviso-promo").textContent = C.aviso; $("aviso-promo").hidden = false; }
@@ -84,6 +85,10 @@
     return (i >= 0 && p.nombre.slice(i + p.marca.length).trim()) || p.nombre;
   }
 
+  // Porcentaje de rebaja si la polera tiene "precioAntes" mayor que su precio (0 = sin oferta)
+  const rebaja = (p) => Number(p.precioAntes) > Number(p.precio) && Number(p.precio) > 0
+    ? Math.round((1 - Number(p.precio) / Number(p.precioAntes)) * 100) : 0;
+
   function tarjeta(p) {
     const boton = crear("button", "tarjeta");
     boton.type = "button";
@@ -105,7 +110,11 @@
     boton.append(crear("p", "tarjeta-nombre", nombreCorto(p)));
 
     const precio = formatoPrecio(p.precio);
-    if (precio) boton.append(crear("p", "tarjeta-precio", precio));
+    if (precio) {
+      const linea = crear("p", "tarjeta-precio", precio);
+      if (rebaja(p)) { linea.append(" ", crear("s", "", formatoPrecio(p.precioAntes))); foto.append(crear("span", "tarjeta-oferta", "−" + rebaja(p) + "%")); }
+      boton.append(linea);
+    }
     const extra = [p.tallas.join(" · "), p.variantes.length > 1 ? p.variantes.length + " colores" : ""].filter(Boolean);
     if (extra.length) boton.append(crear("p", "tarjeta-tallas", extra.join("  |  ")));
     boton.append(crear("span", "tarjeta-comprar", "Comprar"));
@@ -331,6 +340,9 @@
     }).filter(Boolean);
   }
 
+  // Envío: se cobra "costo" salvo que el total (ya con la promo) llegue a "gratisDesde"
+  const ENVIO = C.envio || null;
+
   function totales() {
     const ls = lineas();
     const unidades = ls.reduce((a, x) => a + x.l.cant, 0);
@@ -338,14 +350,34 @@
     const elegibles = ls.reduce((a, x) => a + (enPromo(x.p) ? x.l.cant : 0), 0);
     const pares = C.promo ? Math.floor(elegibles / 2) : 0;
     const descuento = C.promo ? pares * Math.max(0, 2 * C.promo.precioUnidad - C.promo.precioPar) : 0;
-    return { ls, unidades, subtotal, elegibles, pares, descuento, total: subtotal - descuento };
+    const productos = subtotal - descuento;
+    const envioGratis = !ENVIO || productos >= ENVIO.gratisDesde;
+    const envio = ls.length && ENVIO && !envioGratis ? ENVIO.costo : 0;
+    return { ls, unidades, subtotal, elegibles, pares, descuento, productos, envio, envioGratis, total: productos + envio };
   }
+
+  const comentario = () => $("carrito-comentario").value.trim().slice(0, 200);
 
   function mensajePedido(t) {
     const filas = t.ls.map((x) => "• " + x.l.cant + " x " + x.p.nombre + (x.v && x.v.color ? " — " + x.v.color : "") + (x.l.talla ? " — talla " + x.l.talla : "") + (x.precio ? " (" + formatoPrecio(x.precio * x.l.cant) + ")" : ""));
     return ["Hola! Quiero hacer este pedido:", ...filas,
       t.descuento ? "Promo 2 x " + formatoPrecio(C.promo.precioPar) + (t.pares > 1 ? " (" + t.pares + " pares)" : "") + ": −" + formatoPrecio(t.descuento) : "",
-      "Total: " + formatoPrecio(t.total)].filter(Boolean).join("\n");
+      ENVIO ? "Envío: " + (t.envioGratis ? "gratis" : formatoPrecio(t.envio)) : "",
+      "Total: " + formatoPrecio(t.total),
+      comentario() ? "Comentario: " + comentario() : ""].filter(Boolean).join("\n");
+  }
+
+  // Poleras para sugerir en el carrito: primero las que completan la promo, luego de las mismas marcas
+  function recomendadas(t) {
+    const enCarrito = new Set(t.ls.map((x) => x.p.id));
+    const marcasCarrito = new Set(t.ls.map((x) => x.p.marca));
+    const faltaPar = t.elegibles % 2 === 1;
+    const puntaje = (p) => (faltaPar && enPromo(p) ? 2 : 0) + (marcasCarrito.has(p.marca) ? 1 : 0);
+    return productos
+      .filter((p) => !enCarrito.has(p.id) && Number(p.precio) > 0)
+      .map((p, orden) => ({ p, orden, pts: puntaje(p) }))
+      .sort((a, b) => b.pts - a.pts || a.orden - b.orden)
+      .slice(0, 6).map((x) => x.p);
   }
 
   function pintarCarrito() {
@@ -354,7 +386,7 @@
     $("carrito-cuenta").hidden = !t.unidades;
     $("abrir-carrito").setAttribute("aria-label", "Abrir carrito (" + t.unidades + (t.unidades === 1 ? " polera)" : " poleras)"));
 
-    const lista = $("carrito-lista");
+    const lista = $("carrito-items");
     if (!t.ls.length) {
       lista.replaceChildren(crear("p", "carrito-vacio", "Tu carrito está vacío. Elige una polera, su talla y toca “Comprar ahora”."));
     } else {
@@ -380,22 +412,43 @@
         return fila;
       }));
     }
+    $("carrito-comentario-caja").hidden = !t.ls.length;
 
-    // Avance hacia la promo 2x
-    const promo = $("carrito-promo");
-    promo.hidden = !(C.promo && t.elegibles > 0);
-    if (!promo.hidden) {
-      const falta = t.elegibles % 2 === 1;
-      $("carrito-promo-texto").textContent = falta
-        ? "Agrega 1 polera de " + formatoPrecio(C.promo.precioUnidad) + " más y llevas 2 por " + formatoPrecio(C.promo.precioPar) + " con envío incluido"
-        : "Promo 2 x " + formatoPrecio(C.promo.precioPar) + " aplicada · Envío incluido";
-      $("carrito-barra").style.width = falta ? "50%" : "100%";
+    // Sugerencias para sumar otra polera
+    const sugeridas = t.ls.length ? recomendadas(t) : [];
+    $("carrito-sugeridas").hidden = !sugeridas.length;
+    $("carrito-sugeridas-titulo").textContent = ENVIO && !t.envioGratis ? "Suma otra y llega al envío gratis" : "También te puede gustar";
+    $("carrito-sugeridas-lista").replaceChildren(...sugeridas.map((p) => {
+      const a = crear("a", "sugerida");
+      a.href = "#p=" + p.id;
+      a.addEventListener("click", () => mostrarCarrito(false));
+      const img = crear("img");
+      img.src = miniatura(p.imagenes[0] || "");
+      img.alt = "";
+      img.loading = "lazy";
+      a.append(img, crear("span", "sugerida-nombre", nombreCorto(p)), crear("span", "sugerida-precio", formatoPrecio(p.precio)));
+      return a;
+    }));
+
+    // Barra de avance: envío gratis y promo 2x
+    const barra = $("carrito-promo");
+    barra.hidden = !t.ls.length || !(ENVIO || C.promo);
+    if (!barra.hidden) {
+      const faltaPar = C.promo && t.elegibles % 2 === 1;
+      let texto, avance;
+      if (ENVIO && t.envioGratis) { texto = "¡Felicidades! Tu pedido tiene envío gratis"; avance = 1; }
+      else if (faltaPar) { texto = "Agrega 1 polera de " + formatoPrecio(C.promo.precioUnidad) + " más: llevas 2 por " + formatoPrecio(C.promo.precioPar) + (ENVIO ? " con envío gratis" : ""); avance = ENVIO ? t.productos / ENVIO.gratisDesde : 0.5; }
+      else if (ENVIO) { texto = "Te faltan " + formatoPrecio(ENVIO.gratisDesde - t.productos) + " para el envío gratis"; avance = t.productos / ENVIO.gratisDesde; }
+      else { texto = "Promo 2 x " + formatoPrecio(C.promo.precioPar) + " aplicada"; avance = 1; }
+      $("carrito-promo-texto").textContent = texto;
+      $("carrito-barra").style.width = Math.round(Math.max(0.06, Math.min(1, avance)) * 100) + "%";
     }
 
     const fila = (dt, dd, clase) => { const d = crear("div", clase || ""); d.append(crear("dt", "", dt), crear("dd", "", dd)); return d; };
     $("carrito-totales").replaceChildren(...[
-      t.descuento ? fila("Subtotal", formatoPrecio(t.subtotal)) : null,
+      t.descuento || ENVIO ? fila("Subtotal", formatoPrecio(t.subtotal)) : null,
       t.descuento ? fila("Promo 2 x " + formatoPrecio(C.promo.precioPar), "−" + formatoPrecio(t.descuento)) : null,
+      ENVIO && t.ls.length ? fila("Envío", t.envioGratis ? "Gratis" : formatoPrecio(t.envio)) : null,
       fila("Total", formatoPrecio(t.total), "carrito-total"),
     ].filter(Boolean));
 
@@ -405,6 +458,9 @@
     if (!t.ls.length) pasoCarrito("lista");
     else pasoCarrito($("carrito-datos").hidden ? "lista" : "datos");
   }
+  $("carrito-comentario").addEventListener("input", () => {
+    if (carrito.length) $("carrito-pedir").href = linkWhatsapp(mensajePedido(totales()));
+  });
 
   // ---------- Pago en línea ----------
   // Solo se activa si config.js tiene la dirección del servicio de pagos (pago.url).
@@ -447,7 +503,7 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: carrito.map((l) => ({ id: l.id, color: l.color, talla: l.talla, cant: l.cant })),
-          cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"), direccion: valor("pg-direccion"), comuna: valor("pg-comuna"), region: valor("pg-region"), nota: valor("pg-nota") },
+          cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"), direccion: valor("pg-direccion"), comuna: valor("pg-comuna"), region: valor("pg-region"), nota: comentario() },
         }),
       });
       const datos = await r.json().catch(() => ({}));
@@ -464,7 +520,7 @@
   function mostrarCarrito(ver) {
     $("carrito").hidden = !ver;
     document.body.classList.toggle("sin-scroll", ver || !$("detalle").hidden);
-    if (ver) { $("carrito-datos").hidden = true; pintarCarrito(); $("cerrar-carrito").focus(); }
+    if (ver) { $("carrito-datos").hidden = true; pintarCarrito(); $("carrito-lista").scrollTop = 0; $("cerrar-carrito").focus(); }
   }
   $("abrir-carrito").addEventListener("click", () => mostrarCarrito(true));
   $("cerrar-carrito").addEventListener("click", () => mostrarCarrito(false));
@@ -538,10 +594,18 @@
     actualizarConsulta();
   }
 
+  // "Guía de tallas": lleva a la última foto de la galería
+  $("detalle-guia").addEventListener("click", () => {
+    irAFoto(999);
+    $("detalle").scrollTo({ top: 0, behavior: "smooth" });
+    const caja = document.querySelector(".detalle-caja");
+    if (caja) caja.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
   function elegirTalla(talla) {
     enDetalle.talla = talla;
     $("detalle-talla-actual").textContent = talla || "";
-    $("detalle-tallas").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === talla)));
+    $("detalle-tallas").querySelectorAll(".chips button").forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === talla)));
     $("detalle-error").hidden = true;
     actualizarConsulta();
   }
@@ -551,8 +615,17 @@
     $("detalle-marca").textContent = p.marca || "";
     $("detalle-nombre").textContent = p.nombre;
     const precio = formatoPrecio(p.precio);
-    $("detalle-precio").textContent = precio;
+    $("detalle-precio").replaceChildren(precio);
+    if (precio && rebaja(p)) $("detalle-precio").append(" ", crear("s", "", formatoPrecio(p.precioAntes)), " ", crear("span", "detalle-oferta", "−" + rebaja(p) + "%"));
     $("detalle-precio").hidden = !precio;
+    // Secciones desplegables: descripción propia de la polera (si tiene) + las de config.js
+    const info = (p.descripcion ? [{ titulo: "Descripción", texto: p.descripcion }] : []).concat(
+      (C.infoProducto || []).filter((x) => !(p.descripcion && x.titulo === "Descripción")));
+    $("detalle-secciones").replaceChildren(...info.map((x) => {
+      const d = crear("details", "pregunta");
+      d.append(crear("summary", "", x.titulo), crear("p", "", x.texto));
+      return d;
+    }));
     // "sinPromo": true en products.json oculta el aviso de promoción en esa polera
     $("detalle-promo").textContent = enPromo(p) ? C.promo.detalle : "";
     $("detalle-promo").hidden = !enPromo(p);
