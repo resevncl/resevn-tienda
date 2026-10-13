@@ -475,7 +475,7 @@
     $("carrito-pagar").hidden = !(conPago && hay) || datos;
     $("carrito-confirmar").hidden = !datos;
     $("carrito-nota").hidden = conPago || !hay;
-    $("carrito-seguir").textContent = datos ? "Volver al carrito" : hay ? "Seguir viendo poleras" : "Ver poleras";
+    $("carrito-seguir").textContent = datos ? "Volver al carrito" : hay ? "Seguir comprando" : "Ver poleras";
     $("carrito-seguir").className = "boton " + (hay ? "boton-borde" : "boton-oscuro");
     $("carrito-titulo").textContent = datos ? "Finalizar compra" : "Carrito";
     if (!datos) $("carrito-error").hidden = true;
