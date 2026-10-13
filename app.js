@@ -90,7 +90,7 @@
       img.decoding = "async";
       foto.append(img);
     });
-    if (enPromo(p)) foto.append(crear("span", "tarjeta-promo", C.promo.etiqueta));
+    if (enPromo(p) && C.promo.etiqueta) foto.append(crear("span", "tarjeta-promo", C.promo.etiqueta));
     boton.append(foto);
     if (p.marca) boton.append(crear("p", "tarjeta-marca", p.marca));
     boton.append(crear("p", "tarjeta-nombre", nombreCorto(p)));

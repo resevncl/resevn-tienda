@@ -27,7 +27,7 @@ window.CONFIG = {
   // (y que no tengan "sinPromo": true en products.json). null = sin promoción.
   promo: {
     precioUnidad: 26990,
-    etiqueta: "2 x $49.990",
+    etiqueta: "",   // texto sobre la foto en el catálogo, ej: "2 x $49.990". "" = sin etiqueta
     detalle: "Promo: lleva 2 poleras de $26.990 por $49.990 · Envío incluido",
   },
 
