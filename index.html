@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791855076">
+  <link rel="stylesheet" href="styles.css?v=1791855715">
 </head>
 <body>
 
@@ -126,16 +126,30 @@
         <div class="carrito-barra"><span id="carrito-barra"></span></div>
       </div>
       <div class="carrito-lista" id="carrito-lista"></div>
+      <form class="carrito-datos" id="carrito-datos" autocomplete="on" hidden>
+        <p class="carrito-paso">Datos de entrega</p>
+        <label>Nombre y apellido<input id="pg-nombre" name="name" autocomplete="name" required maxlength="80"></label>
+        <label>Teléfono<input id="pg-telefono" name="tel" type="tel" autocomplete="tel" required maxlength="20" placeholder="+56 9 1234 5678"></label>
+        <label>Correo (opcional)<input id="pg-email" name="email" type="email" autocomplete="email" maxlength="120"></label>
+        <label>Dirección<input id="pg-direccion" name="address" autocomplete="street-address" required maxlength="140" placeholder="Calle, número, depto"></label>
+        <label>Comuna<input id="pg-comuna" name="comuna" autocomplete="address-level2" required maxlength="60"></label>
+        <label>Región<input id="pg-region" name="region" autocomplete="address-level1" maxlength="60"></label>
+        <label>Nota (opcional)<input id="pg-nota" name="nota" maxlength="200" placeholder="Referencia, horario, etc."></label>
+        <p class="carrito-nota">Usamos estos datos solo para entregar tu pedido. El pago se hace en Mercado Pago; esta página no ve ni guarda los datos de tu tarjeta.</p>
+      </form>
       <div class="carrito-pie">
         <dl class="carrito-totales" id="carrito-totales"></dl>
-        <p class="carrito-nota">Tu compra se envía por WhatsApp. Ahí confirmamos disponibilidad, pago y entrega.</p>
+        <p class="detalle-error" id="carrito-error" role="alert" hidden></p>
+        <button class="boton boton-oscuro" id="carrito-pagar" type="button" hidden>Pagar</button>
+        <button class="boton boton-oscuro" id="carrito-confirmar" type="submit" form="carrito-datos" hidden>Pagar con Mercado Pago</button>
+        <p class="carrito-nota" id="carrito-nota">Tu compra se envía por WhatsApp. Ahí confirmamos disponibilidad, pago y entrega.</p>
         <a class="boton boton-whatsapp" id="carrito-pedir" target="_blank" rel="noopener">Comprar por WhatsApp</a>
         <button class="boton boton-borde" id="carrito-seguir" type="button">Continuar comprando</button>
       </div>
     </div>
   </div>
 
-  <script src="config.js?v=1791855076"></script>
-  <script src="app.js?v=1791855076"></script>
+  <script src="config.js?v=1791855715"></script>
+  <script src="app.js?v=1791855715"></script>
 </body>
 </html>

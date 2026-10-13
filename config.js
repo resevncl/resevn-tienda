@@ -32,6 +32,10 @@ window.CONFIG = {
     detalle: "Promo: lleva 2 poleras de $26.990 por $49.990 · Envío incluido",
   },
 
+  // Pago en línea con Mercado Pago. "url" es la dirección del servicio de pagos
+  // (ej: "https://pagos.resevn.cl"). Mientras esté vacío, el sitio solo vende por WhatsApp.
+  pago: { url: "" },
+
   // Plazo de entrega: se muestra en el detalle de cada polera y en el footer. "" = no mostrar.
   notaEntrega: "Productos por encargo · Entrega estimada de 1 a 2 semanas",
 

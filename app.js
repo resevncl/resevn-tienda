@@ -402,16 +402,75 @@
     const pedir = $("carrito-pedir");
     pedir.hidden = !t.ls.length;
     if (t.ls.length) pedir.href = linkWhatsapp(mensajePedido(t));
+    if (!t.ls.length) pasoCarrito("lista");
+    else pasoCarrito($("carrito-datos").hidden ? "lista" : "datos");
   }
+
+  // ---------- Pago en línea ----------
+  // Solo se activa si config.js tiene la dirección del servicio de pagos (pago.url).
+  const conPago = !!(C.pago && C.pago.url);
+
+  // El carrito tiene dos pasos: "lista" (las poleras) y "datos" (entrega y pago)
+  function pasoCarrito(paso) {
+    const hay = carrito.length > 0, datos = paso === "datos" && hay && conPago;
+    $("carrito-datos").hidden = !datos;
+    $("carrito-lista").hidden = datos;
+    $("carrito-pagar").hidden = !(conPago && hay) || datos;
+    $("carrito-confirmar").hidden = !datos;
+    $("carrito-pedir").textContent = conPago ? "Prefiero comprar por WhatsApp" : "Comprar por WhatsApp";
+    $("carrito-pedir").className = "boton " + (conPago ? "boton-borde" : "boton-whatsapp");
+    $("carrito-nota").hidden = conPago;
+    $("carrito-seguir").textContent = datos ? "Volver al carrito" : "Continuar comprando";
+    $("carrito-titulo").textContent = datos ? "Finalizar compra" : "Carrito";
+    if (!datos) $("carrito-error").hidden = true;
+  }
+
+  const ERRORES_PAGO = {
+    faltan_datos: "Completa tu nombre, teléfono, dirección y comuna.",
+    email_invalido: "Revisa el correo: parece estar mal escrito.",
+    producto_no_disponible: "Una de las poleras del carrito ya no está disponible. Quítala e inténtalo de nuevo.",
+    talla_invalida: "Una de las tallas del carrito no está disponible. Revísala e inténtalo de nuevo.",
+    carrito_vacio: "Tu carrito está vacío.",
+  };
+
+  $("carrito-pagar").addEventListener("click", () => { pasoCarrito("datos"); $("pg-nombre").focus(); });
+  $("carrito-datos").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = $("carrito-error"), boton = $("carrito-confirmar");
+    err.hidden = true;
+    boton.disabled = true;
+    boton.textContent = "Abriendo Mercado Pago…";
+    const valor = (id) => $(id).value.trim();
+    try {
+      const r = await fetch(C.pago.url.replace(/\/$/, "") + "/crear-pago", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: carrito.map((l) => ({ id: l.id, color: l.color, talla: l.talla, cant: l.cant })),
+          cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"), direccion: valor("pg-direccion"), comuna: valor("pg-comuna"), region: valor("pg-region"), nota: valor("pg-nota") },
+        }),
+      });
+      const datos = await r.json().catch(() => ({}));
+      if (r.ok && datos.url) { location.href = datos.url; return; }
+      err.textContent = ERRORES_PAGO[datos.error] || "No pudimos iniciar el pago. Inténtalo de nuevo en un momento o compra por WhatsApp.";
+    } catch (x) {
+      err.textContent = "No pudimos conectar con el servicio de pago. Revisa tu conexión o compra por WhatsApp.";
+    }
+    err.hidden = false;
+    boton.disabled = false;
+    boton.textContent = "Pagar con Mercado Pago";
+  });
 
   function mostrarCarrito(ver) {
     $("carrito").hidden = !ver;
     document.body.classList.toggle("sin-scroll", ver || !$("detalle").hidden);
-    if (ver) { pintarCarrito(); $("cerrar-carrito").focus(); }
+    if (ver) { $("carrito-datos").hidden = true; pintarCarrito(); $("cerrar-carrito").focus(); }
   }
   $("abrir-carrito").addEventListener("click", () => mostrarCarrito(true));
   $("cerrar-carrito").addEventListener("click", () => mostrarCarrito(false));
-  $("carrito-seguir").addEventListener("click", () => mostrarCarrito(false));
+  $("carrito-seguir").addEventListener("click", () => {
+    if (!$("carrito-datos").hidden) pasoCarrito("lista"); else mostrarCarrito(false);
+  });
   $("carrito").addEventListener("click", (e) => { if (e.target === $("carrito")) mostrarCarrito(false); });
 
   // ---------- Detalle ----------

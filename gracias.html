@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RESEVN — Tu compra</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="styles.css?v=1791855716">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-fila">
+      <a class="logo" href="./" id="logo"><img id="logo-img" alt="" hidden><span id="logo-texto" data-tienda></span></a>
+    </div>
+  </header>
+
+  <main class="texto resultado">
+    <h1 id="titulo">Revisando tu pago…</h1>
+    <p id="mensaje"></p>
+    <dl class="resultado-datos" id="datos" hidden></dl>
+    <div class="resultado-botones">
+      <a class="boton boton-whatsapp" id="avisar" target="_blank" rel="noopener" hidden>Coordinar entrega por WhatsApp</a>
+      <a class="boton boton-borde" href="./" id="volver">Volver a la tienda</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
+  </footer>
+
+  <script src="config.js?v=1791855716"></script>
+  <script>
+    (function () {
+      var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
+      document.querySelectorAll("[data-tienda]").forEach(function (el) { el.textContent = C.nombreTienda; });
+      if (C.logo) {
+        $("logo-img").src = C.logo; $("logo-img").hidden = false;
+        if (C.logoComoInicial) { $("logo-texto").textContent = C.nombreTienda.slice(1); $("logo").setAttribute("aria-label", C.nombreTienda); }
+      }
+      $("anio").textContent = new Date().getFullYear();
+
+      // Mercado Pago vuelve a esta página con el resultado en la dirección
+      var q = new URLSearchParams(location.search);
+      var estado = q.get("status") || q.get("collection_status") || "";
+      var pedido = (q.get("external_reference") || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 20);
+      var pago = (q.get("payment_id") || q.get("collection_id") || "").replace(/\D/g, "").slice(0, 20);
+
+      var textos = {
+        approved: ["¡Pago recibido!", "Gracias por tu compra. Escríbenos por WhatsApp con tu número de pedido para coordinar la entrega."],
+        pending: ["Tu pago está pendiente", "Mercado Pago todavía está procesando el pago. Te avisaremos cuando se confirme; si pagaste en efectivo o por transferencia puede tardar un poco."],
+        in_process: ["Tu pago está en revisión", "Mercado Pago está revisando el pago. Normalmente se resuelve en poco tiempo."],
+        rejected: ["El pago no se completó", "No se hizo ningún cobro. Puedes volver a la tienda e intentarlo de nuevo, o comprar por WhatsApp."],
+      };
+      var t = textos[estado] || (estado ? textos.rejected : ["No encontramos un pago", "Esta página muestra el resultado de una compra. Si llegaste aquí por error, vuelve a la tienda."]);
+      $("titulo").textContent = t[0];
+      $("mensaje").textContent = t[1];
+
+      if (pedido || pago) {
+        var dl = $("datos");
+        [["Pedido", pedido], ["Pago Mercado Pago", pago]].forEach(function (f) {
+          if (!f[1]) return;
+          var d = document.createElement("div"), a = document.createElement("dt"), b = document.createElement("dd");
+          a.textContent = f[0]; b.textContent = f[1]; d.appendChild(a); d.appendChild(b); dl.appendChild(d);
+        });
+        dl.hidden = false;
+      }
+
+      if (estado === "approved" || estado === "pending" || estado === "in_process") {
+        var msj = "Hola! Hice una compra en " + C.nombreTienda + "." + (pedido ? " Pedido: " + pedido + "." : "") + (pago ? " Pago Mercado Pago: " + pago + "." : "") + " Quiero coordinar la entrega.";
+        $("avisar").href = "https://wa.me/" + C.whatsapp.replace(/\D/g, "") + "?text=" + encodeURIComponent(msj);
+        $("avisar").hidden = false;
+      }
+      // Con el pago aprobado, el carrito ya no se necesita
+      if (estado === "approved") { try { localStorage.removeItem("resevn-carrito"); } catch (e) {} }
+    })();
+  </script>
+</body>
+</html>
