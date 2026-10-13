@@ -47,7 +47,7 @@ window.CONFIG = {
   // Preguntas frecuentes: p = pregunta, r = respuesta
   preguntas: [
     { p: "¿Cómo compro?",
-      r: "Elige tu polera, su talla y color, y agrégala al carrito. Al terminar, abre el carrito y toca “Pedir por WhatsApp”: te confirmamos disponibilidad, forma de pago y entrega. Si prefieres preguntar antes, usa los botones de consulta de cada polera." },
+      r: "Elige tu polera, su talla y color, y toca “Comprar ahora”. Se abre tu carrito: ahí toca “Comprar por WhatsApp” y te confirmamos disponibilidad, forma de pago y entrega. Si prefieres preguntar antes, usa los botones de consulta de cada polera." },
     { p: "¿Cuánto demora en llegar?",
       r: "Trabajamos por encargo. La entrega estimada es de 1 a 2 semanas desde que confirmas tu pedido." },
     { p: "¿Hacen envíos a todo Chile?",
@@ -65,10 +65,10 @@ window.CONFIG = {
   // Fotos grandes del inicio (carrusel). Cada una: imagen, título, texto del botón y,
   // opcionalmente, la marca que abre el botón (sin "marca", abre todas las poleras).
   banners: [
-    { imagen: "img/polera-valley-dreams-ufo-negro-06.webp", titulo: "Nueva colección", boton: "Ver todo" },
-    { imagen: "img/polera-life-hustlers-astronauta-negro-06.webp", titulo: "Life Hustlers", boton: "Ver poleras", marca: "Life Hustlers" },
-    { imagen: "img/polera-supply-aliens-negro-06.webp", titulo: "Supply", boton: "Ver poleras", marca: "Supply" },
-    { imagen: "img/polera-mixed-emotion-alas-rojas-negro-05.webp", titulo: "Mixed Emotion", boton: "Ver poleras", marca: "Mixed Emotion" },
+    { imagen: "img/polera-valley-dreams-ufo-negro-06.webp", titulo: "Nueva colección", boton: "Comprar ahora" },
+    { imagen: "img/polera-life-hustlers-astronauta-negro-06.webp", titulo: "Life Hustlers", boton: "Comprar", marca: "Life Hustlers" },
+    { imagen: "img/polera-supply-aliens-negro-06.webp", titulo: "Supply", boton: "Comprar", marca: "Supply" },
+    { imagen: "img/polera-mixed-emotion-alas-rojas-negro-05.webp", titulo: "Mixed Emotion", boton: "Comprar", marca: "Mixed Emotion" },
   ],
 
   // Poleras destacadas en el inicio: lista de "id" de products.json.

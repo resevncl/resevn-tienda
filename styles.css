@@ -116,6 +116,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .tarjeta-nombre { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; overflow-wrap: anywhere; }
 .tarjeta-precio { font-size: 13px; font-weight: 700; margin-top: 4px; }
 .tarjeta-tallas { font-size: 11px; letter-spacing: 0.08em; color: var(--gris); margin-top: 4px; }
+.tarjeta-comprar { display: inline-block; margin-top: 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; border-bottom: 1px solid currentColor; padding-bottom: 2px; }
 .aviso { text-align: center; color: var(--gris); padding: 48px 0; }
 
 /* ---------- Reseñas y preguntas frecuentes ---------- */
@@ -188,6 +189,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .detalle-info .boton { display: block; width: 100%; margin-top: 10px; }
 .detalle-info .boton-oscuro { margin-top: 28px; }
 .detalle-error + .boton-oscuro { margin-top: 10px; }
+.detalle-dudas { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gris); margin-top: 26px; }
+.detalle-consulta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.detalle-consulta .boton { padding: 12px 8px; font-size: 11px; }
 .detalle-entrega { font-size: 11px; letter-spacing: 0.06em; color: var(--gris); text-align: center; margin-top: 16px; }
 
 /* ---------- Carrito ---------- */

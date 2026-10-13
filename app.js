@@ -108,6 +108,7 @@
     if (precio) boton.append(crear("p", "tarjeta-precio", precio));
     const extra = [p.tallas.join(" · "), p.variantes.length > 1 ? p.variantes.length + " colores" : ""].filter(Boolean);
     if (extra.length) boton.append(crear("p", "tarjeta-tallas", extra.join("  |  ")));
+    boton.append(crear("span", "tarjeta-comprar", "Comprar"));
     return boton;
   }
 
@@ -277,7 +278,7 @@
       if (i === 0) img.fetchPriority = "high"; else img.loading = "lazy";
       const texto = crear("div", "banner-texto");
       texto.append(crear(i === 0 ? "h1" : "p", "banner-titulo", b.titulo || ""));
-      const boton = crear("button", "boton boton-claro", b.boton || "Ver poleras");
+      const boton = crear("button", "boton boton-claro", b.boton || "Comprar");
       boton.type = "button";
       boton.addEventListener("click", () => { location.hash = b.marca ? "m=" + encodeURIComponent(b.marca) : "todo"; });
       texto.append(boton);
@@ -355,7 +356,7 @@
 
     const lista = $("carrito-lista");
     if (!t.ls.length) {
-      lista.replaceChildren(crear("p", "carrito-vacio", "Tu carrito está vacío. Elige una polera, su talla y toca “Agregar al carrito”."));
+      lista.replaceChildren(crear("p", "carrito-vacio", "Tu carrito está vacío. Elige una polera, su talla y toca “Comprar ahora”."));
     } else {
       lista.replaceChildren(...t.ls.map((x) => {
         const fila = crear("article", "carrito-item");
@@ -538,20 +539,32 @@
     elegirTalla(enDetalle.talla);
   }
 
-  $("detalle-agregar").addEventListener("click", () => {
-    if (!enDetalle) return;
+  // Agrega al carrito la polera abierta con el color y la talla elegidos. Devuelve false si falta la talla
+  function agregarAlCarrito() {
+    if (!enDetalle) return false;
     const { p, color, talla } = enDetalle;
     if (p.tallas.length && !talla) {
-      $("detalle-error").textContent = "Elige una talla para agregarla al carrito.";
+      $("detalle-error").textContent = "Elige una talla para continuar.";
       $("detalle-error").hidden = false;
-      return;
+      $("detalle-tallas").scrollIntoView({ block: "center", behavior: "smooth" });
+      return false;
     }
     const igual = carrito.find((l) => l.id === p.id && l.color === color && l.talla === talla);
     if (igual) igual.cant = Math.min(20, igual.cant + 1);
     else carrito.push({ id: p.id, color, talla, cant: 1 });
     guardarCarrito();
     pintarCarrito();
-    mostrarCarrito(true);
+    return true;
+  }
+  // "Comprar ahora": agrega y abre el carrito para terminar la compra
+  $("detalle-comprar").addEventListener("click", () => { if (agregarAlCarrito()) mostrarCarrito(true); });
+  // "Agregar al carrito": agrega y deja seguir mirando
+  let avisoAgregada;
+  $("detalle-agregar").addEventListener("click", () => {
+    if (!agregarAlCarrito()) return;
+    $("detalle-agregar").textContent = "Agregada al carrito ✓";
+    clearTimeout(avisoAgregada);
+    avisoAgregada = setTimeout(() => { $("detalle-agregar").textContent = "Agregar al carrito"; }, 2200);
   });
 
   function cerrarDetalle() {
