@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791930092">
+  <link rel="stylesheet" href="styles.css?v=1791931022">
 </head>
 <body class="pagina-pago">
 
@@ -37,6 +37,8 @@
         <section>
           <h2><span>2</span> Entrega</h2>
           <label>Nombre y apellido<input id="pg-nombre" name="name" autocomplete="name" required maxlength="80"></label>
+          <label>RUT de quien recibe<input id="pg-rut" name="rut" autocomplete="off" required maxlength="12" placeholder="12.345.678-9"></label>
+          <p class="pago-nota">La empresa de despacho pide el RUT para entregar el pedido.</p>
           <label>Dirección<input id="pg-direccion" name="address" autocomplete="address-line1" required maxlength="100" placeholder="Calle y número"></label>
           <label>Casa, depto o referencia<input id="pg-depto" name="address2" autocomplete="address-line2" required maxlength="38" placeholder="Ej: Casa · Depto 402, Torre B"></label>
           <div class="pago-par">
@@ -88,8 +90,8 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1791930092"></script>
-  <script src="comunas.js?v=1791930092"></script>
+  <script src="config.js?v=1791931022"></script>
+  <script src="comunas.js?v=1791931022"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -157,6 +159,23 @@
         $("pago-columnas").hidden = false;
       }
 
+      // RUT: se revisa el dígito verificador y se ordena como 12.345.678-9
+      var rutLimpio = function (v) { return String(v || "").replace(/[^0-9kK]/g, "").toUpperCase(); };
+      var rutValido = function (v) {
+        var r = rutLimpio(v); if (!/^\d{7,8}[0-9K]$/.test(r)) return false;
+        var cuerpo = r.slice(0, -1), suma = 0, m = 2;
+        for (var i = cuerpo.length - 1; i >= 0; i--) { suma += Number(cuerpo[i]) * m; m = m === 7 ? 2 : m + 1; }
+        var dv = 11 - (suma % 11);
+        return (dv === 11 ? "0" : dv === 10 ? "K" : String(dv)) === r.slice(-1);
+      };
+      var rutBonito = function (v) { var r = rutLimpio(v); return r.length < 2 ? r : r.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "-" + r.slice(-1); };
+      $("pg-rut").addEventListener("input", function () { $("pg-rut").setCustomValidity(""); });
+      $("pg-rut").addEventListener("blur", function () {
+        var el = $("pg-rut"); if (!el.value.trim()) return;
+        el.value = rutBonito(el.value);
+        el.setCustomValidity(rutValido(el.value) ? "" : "Revisa el RUT: no parece válido.");
+      });
+
       // Las comunas dependen de la región elegida
       $("pg-region").addEventListener("change", function () {
         var lista = (window.COMUNAS || {})[$("pg-region").value] || [], sel = $("pg-comuna");
@@ -167,7 +186,8 @@
       });
 
       var ERRORES = {
-        faltan_datos: "Completa tu correo, teléfono, nombre, dirección, casa o depto, región y comuna.",
+        faltan_datos: "Completa tu correo, teléfono, nombre, RUT, dirección, casa o depto, región y comuna.",
+        rut_invalido: "Revisa el RUT: no parece válido.",
         email_invalido: "Revisa el correo: parece estar mal escrito.",
         producto_no_disponible: "Una de las poleras del carrito ya no está disponible. Vuelve al carrito, quítala e inténtalo de nuevo.",
         talla_invalida: "Una de las tallas del carrito no está disponible. Vuelve al carrito y revísala.",
@@ -178,6 +198,7 @@
         e.preventDefault();
         var err = $("pago-error"), boton = $("pago-confirmar");
         var valor = function (id) { return $(id).value.trim(); };
+        if (!rutValido(valor("pg-rut"))) { $("pg-rut").setCustomValidity("Revisa el RUT: no parece válido."); $("pg-rut").reportValidity(); return; }
         err.hidden = true;
         boton.disabled = true;
         boton.textContent = "Abriendo Mercado Pago…";
@@ -187,7 +208,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             items: carrito.map(function (l) { return { id: l.id, color: l.color, talla: l.talla, cant: l.cant }; }),
-            cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"),
+            cliente: { nombre: valor("pg-nombre"), rut: rutBonito(valor("pg-rut")), telefono: valor("pg-telefono"), email: valor("pg-email"),
               direccion: valor("pg-direccion") + (valor("pg-depto") ? ", " + valor("pg-depto") : ""), comuna: valor("pg-comuna"), region: valor("pg-region"), novedades: $("pg-novedades").checked },
           }),
         }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
