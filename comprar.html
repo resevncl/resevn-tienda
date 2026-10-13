@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791929523">
+  <link rel="stylesheet" href="styles.css?v=1791929798">
 </head>
 <body class="pagina-pago">
 
@@ -37,7 +37,7 @@
           <h2><span>2</span> Entrega</h2>
           <label>Nombre y apellido<input id="pg-nombre" name="name" autocomplete="name" required maxlength="80"></label>
           <label>Dirección<input id="pg-direccion" name="address" autocomplete="address-line1" required maxlength="100" placeholder="Calle y número"></label>
-          <label>Depto, casa o referencia (opcional)<input id="pg-depto" name="address2" autocomplete="address-line2" maxlength="38"></label>
+          <label>Casa, depto o referencia<input id="pg-depto" name="address2" autocomplete="address-line2" required maxlength="38" placeholder="Ej: Casa · Depto 402, Torre B"></label>
           <div class="pago-par">
             <label>Región<select id="pg-region" name="region" autocomplete="address-level1" required>
               <option value="">Elige tu región</option>
@@ -85,7 +85,7 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1791929523"></script>
+  <script src="config.js?v=1791929798"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -154,7 +154,7 @@
       }
 
       var ERRORES = {
-        faltan_datos: "Completa tu correo, teléfono, nombre, dirección, región y comuna.",
+        faltan_datos: "Completa tu correo, teléfono, nombre, dirección, casa o depto, región y comuna.",
         email_invalido: "Revisa el correo: parece estar mal escrito.",
         producto_no_disponible: "Una de las poleras del carrito ya no está disponible. Vuelve al carrito, quítala e inténtalo de nuevo.",
         talla_invalida: "Una de las tallas del carrito no está disponible. Vuelve al carrito y revísala.",
