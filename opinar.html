@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RESEVN — Deja tu reseña</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="stylesheet" href="styles.css?v=1791929453">
+</head>
+<body class="pagina-pago">
+
+  <header class="header">
+    <div class="header-fila">
+      <a class="logo" href="./" id="logo"><img id="logo-img" alt="" hidden><span id="logo-texto" data-tienda></span></a>
+    </div>
+  </header>
+
+  <main class="pago opinar">
+    <a class="pago-volver" href="./">← Volver a la tienda</a>
+    <h1>Deja tu reseña</h1>
+
+    <div id="opinar-gracias" hidden>
+      <p class="opinar-intro">¡Gracias! Recibimos tu reseña. La revisamos antes de publicarla en la tienda.</p>
+      <a class="boton boton-oscuro" href="./">Volver a la tienda</a>
+    </div>
+
+    <form class="pago-form" id="opinar-form" autocomplete="on">
+      <p class="opinar-intro">¿Ya recibiste tu polera? Cuéntanos cómo te fue. Tu opinión ayuda a otras personas a decidirse.</p>
+
+      <fieldset class="estrellas" id="estrellas">
+        <legend>Tu nota</legend>
+        <div>
+          <label><input type="radio" name="estrellas" value="1" required><span aria-hidden="true">★</span><b>1 estrella</b></label>
+          <label><input type="radio" name="estrellas" value="2"><span aria-hidden="true">★</span><b>2 estrellas</b></label>
+          <label><input type="radio" name="estrellas" value="3"><span aria-hidden="true">★</span><b>3 estrellas</b></label>
+          <label><input type="radio" name="estrellas" value="4"><span aria-hidden="true">★</span><b>4 estrellas</b></label>
+          <label><input type="radio" name="estrellas" value="5"><span aria-hidden="true">★</span><b>5 estrellas</b></label>
+        </div>
+      </fieldset>
+
+      <label>Polera que compraste<select id="op-polera" required><option value="">Elige tu polera</option></select></label>
+      <label>Tu reseña<textarea id="op-texto" required minlength="10" maxlength="600" rows="5" placeholder="Calidad, talla, estampado, tiempo de entrega…"></textarea></label>
+      <label>Tu nombre (como quieres que aparezca)<input id="op-nombre" name="name" autocomplete="given-name" required maxlength="60" placeholder="Ej: Camila R."></label>
+      <label>Número de pedido (opcional)<input id="op-pedido" maxlength="20" placeholder="Viene en el correo de tu compra"></label>
+      <label class="opinar-permiso"><input id="op-permiso" type="checkbox" required><span>Autorizo a RESEVN a publicar esta reseña con mi nombre.</span></label>
+
+      <p class="detalle-error" id="opinar-error" role="alert" hidden></p>
+      <button class="boton boton-oscuro" id="opinar-enviar" type="submit">Enviar reseña</button>
+    </form>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
+  </footer>
+
+  <script src="config.js?v=1791929453"></script>
+  <script>
+    (function () {
+      var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
+      document.querySelectorAll("[data-tienda]").forEach(function (el) { el.textContent = C.nombreTienda; });
+      if (C.logo) {
+        $("logo-img").src = C.logo; $("logo-img").hidden = false;
+        if (C.logoComoInicial) { $("logo-texto").textContent = C.nombreTienda.slice(1); $("logo").setAttribute("aria-label", C.nombreTienda); }
+      }
+      $("anio").textContent = new Date().getFullYear();
+      if (!(C.pago && C.pago.url)) { location.replace("./"); return; }
+
+      // Lista de poleras; si la dirección trae ?p=id, esa queda elegida
+      var elegida = new URLSearchParams(location.search).get("p") || "";
+      fetch("products.json").then(function (r) { return r.json(); }).then(function (ps) {
+        ps.filter(function (p) { return p.visible !== false; }).forEach(function (p) {
+          var o = document.createElement("option"); o.value = p.id; o.textContent = p.nombre; $("op-polera").appendChild(o);
+        });
+        if (elegida) $("op-polera").value = elegida;
+      }).catch(function () {});
+
+      // Las estrellas se pintan hasta la elegida
+      var radios = [].slice.call(document.querySelectorAll("#estrellas input"));
+      var pintar = function () { var n = Number((radios.filter(function (r) { return r.checked; })[0] || {}).value) || 0; radios.forEach(function (r) { r.parentNode.classList.toggle("on", Number(r.value) <= n); }); };
+      radios.forEach(function (r) { r.addEventListener("change", pintar); });
+
+      var ERRORES = { faltan_datos: "Elige tu nota, escribe al menos una frase y marca la autorización.", demasiadas: "Ya recibimos varias reseñas desde aquí hoy. Inténtalo mañana." };
+      $("opinar-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var err = $("opinar-error"), boton = $("opinar-enviar"), sel = $("op-polera");
+        err.hidden = true; boton.disabled = true; boton.textContent = "Enviando…";
+        var fallo = function (t) { err.textContent = t; err.hidden = false; boton.disabled = false; boton.textContent = "Enviar reseña"; };
+        fetch(C.pago.url.replace(/\/$/, "") + "/opinion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre: $("op-nombre").value.trim(), pedido: $("op-pedido").value.trim(), id: sel.value, polera: sel.value ? sel.options[sel.selectedIndex].textContent : "",
+            estrellas: Number((radios.filter(function (r) { return r.checked; })[0] || {}).value) || 0, texto: $("op-texto").value.trim(), permiso: $("op-permiso").checked }),
+        }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (x) {
+            if (x.ok && x.d.ok) { $("opinar-form").hidden = true; $("opinar-gracias").hidden = false; window.scrollTo(0, 0); return; }
+            fallo(ERRORES[x.d.error] || "No pudimos enviar tu reseña. Inténtalo de nuevo en un momento.");
+          })
+          .catch(function () { fallo("No pudimos enviar tu reseña. Revisa tu conexión e inténtalo de nuevo."); });
+      });
+    })();
+  </script>
+</body>
+</html>

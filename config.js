@@ -59,7 +59,9 @@ window.CONFIG = {
 
   // Reseñas de clientes. Solo reseñas reales: copia lo que te escribió el cliente.
   // Mientras la lista esté vacía, la sección no se muestra.
-  // Formato: { nombre: "Camila R.", texto: "Llegó antes de lo esperado…", polera: "Hellstar Logo", fecha: "Octubre 2026" },
+  // Las reseñas que dejan los clientes en resevn.cl/opinar.html llegan a tu correo con la línea lista para pegar aquí.
+  // Formato: { nombre: "Camila R.", texto: "Llegó antes de lo esperado…", polera: "Hellstar Logo", id: "mlc123", estrellas: 5, fecha: "Octubre 2026" },
+  // "id" es el código de la polera: con él la reseña aparece también en la ficha de esa polera. "estrellas" va de 1 a 5.
   resenas: [
   ],
 

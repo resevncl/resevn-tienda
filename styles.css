@@ -128,6 +128,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .resenas { display: grid; gap: 12px; }
 .resena { border: 1px solid var(--linea); padding: 18px; }
 .resena blockquote { font-size: 15px; line-height: 1.5; }
+.estrellas-nota { display: inline-block; font-size: 14px; letter-spacing: 2px; color: var(--negro); }
+.resena .estrellas-nota { display: block; margin-bottom: 8px; }
 .resena figcaption { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gris); margin-top: 10px; }
 .pregunta { border-top: 1px solid var(--linea); }
 .pregunta:last-child { border-bottom: 1px solid var(--linea); }
@@ -196,6 +198,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .detalle-consulta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .detalle-consulta .boton { padding: 12px 8px; font-size: 11px; }
 .detalle-guia { float: right; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--negro); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+.detalle-resenas { background: none; border: 0; padding: 0; margin-top: 8px; font: inherit; font-size: 12px; color: var(--gris); cursor: pointer; text-align: left; }
+.detalle-resenas:hover { color: var(--negro); }
+.detalle-opiniones .resena { border: 0; border-top: 1px solid var(--linea); padding: 14px 0; }
+.detalle-opiniones .resena blockquote { font-size: 13px; }
 .detalle-secciones { margin-top: 28px; }
 .detalle-secciones .pregunta summary { font-size: 12px; padding: 14px 0; }
 .detalle-secciones .pregunta p { font-size: 13px; padding-bottom: 14px; }
@@ -290,6 +296,24 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   .pago-resumen { order: 0; position: sticky; top: 96px; }
   .pago-par { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---------- Dejar una reseña ---------- */
+.opinar { max-width: 560px; }
+.opinar-intro { font-size: 15px; line-height: 1.55; color: #333; margin-bottom: 8px; }
+#opinar-gracias { display: grid; gap: 18px; justify-items: start; }
+.pago-form textarea { font: inherit; font-size: 16px; text-transform: none; letter-spacing: 0; color: var(--negro); border: 1px solid var(--linea); border-radius: 0; padding: 12px; width: 100%; resize: vertical; }
+.pago-form textarea:focus { border-color: var(--negro); outline: none; }
+.estrellas { border: 0; padding: 0; margin: 0; }
+.estrellas legend { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gris); margin-bottom: 4px; }
+.estrellas div { display: flex; gap: 4px; }
+.estrellas label { position: relative; display: block; cursor: pointer; }
+.estrellas input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; padding: 0; border: 0; }
+.estrellas span { display: block; font-size: 38px; line-height: 1; color: var(--linea); }
+.estrellas label.on span { color: var(--negro); }
+.estrellas input:focus-visible + span { outline: 2px solid var(--negro); outline-offset: 2px; }
+.estrellas b { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.pago-form .opinar-permiso { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; text-transform: none; letter-spacing: 0; color: var(--negro); }
+.pago-form .opinar-permiso input { width: 20px; height: 20px; flex: none; padding: 0; margin-top: 1px; accent-color: var(--negro); }
 
 /* ---------- Escritorio ---------- */
 @media (min-width: 700px) {

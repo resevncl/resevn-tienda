@@ -55,13 +55,26 @@
   const enPromo = (p) => !!C.promo && p.sinPromo !== true && Number(p.precio) === Number(C.promo.precioUnidad);
 
   // ---------- Reseñas y preguntas frecuentes ----------
+  // Estrellas de una nota de 1 a 5 (las reseñas sin nota no muestran estrellas)
+  function estrellas(n) {
+    const nota = Math.max(0, Math.min(5, Math.round(Number(n) || 0)));
+    if (!nota) return null;
+    const el = crear("span", "estrellas-nota", "★".repeat(nota) + "☆".repeat(5 - nota));
+    el.setAttribute("role", "img");
+    el.setAttribute("aria-label", nota + " de 5 estrellas");
+    return el;
+  }
+  function tarjetaResena(r, conPolera) {
+    const caja = crear("figure", "resena");
+    const nota = estrellas(r.estrellas);
+    if (nota) caja.append(nota);
+    caja.append(crear("blockquote", "", r.texto));
+    caja.append(crear("figcaption", "", [r.nombre, conPolera && r.polera, r.fecha].filter(Boolean).join(" · ")));
+    return caja;
+  }
+  const resenasDe = (p) => (C.resenas || []).filter((r) => r.id && r.id === p.id);
   if (C.resenas && C.resenas.length) {
-    $("lista-resenas").replaceChildren(...C.resenas.map((r) => {
-      const caja = crear("figure", "resena");
-      caja.append(crear("blockquote", "", r.texto));
-      caja.append(crear("figcaption", "", [r.nombre, r.polera, r.fecha].filter(Boolean).join(" · ")));
-      return caja;
-    }));
+    $("lista-resenas").replaceChildren(...C.resenas.map((r) => tarjetaResena(r, true)));
     $("resenas").hidden = false;
   }
   if (C.preguntas && C.preguntas.length) {
@@ -586,6 +599,20 @@
       d.append(crear("summary", "", x.titulo), crear("p", "", x.texto));
       return d;
     }));
+    // Reseñas de esta polera: nota promedio junto al precio y una sección con los comentarios
+    const rs = resenasDe(p), conNota = rs.filter((r) => Number(r.estrellas) > 0);
+    const resumen = $("detalle-resenas");
+    resumen.hidden = !rs.length;
+    resumen.replaceChildren();
+    if (rs.length) {
+      const promedio = conNota.length ? conNota.reduce((a, r) => a + Number(r.estrellas), 0) / conNota.length : 0;
+      if (promedio) resumen.append(estrellas(promedio), " " + promedio.toFixed(1).replace(".", ",") + " · ");
+      resumen.append(rs.length === 1 ? "1 reseña" : rs.length + " reseñas");
+      const d = crear("details", "pregunta detalle-opiniones");
+      d.append(crear("summary", "", "Reseñas (" + rs.length + ")"), ...rs.map((r) => tarjetaResena(r, false)));
+      $("detalle-secciones").append(d);
+      resumen.onclick = () => { d.open = true; d.scrollIntoView({ block: "nearest" }); };
+    }
     // "sinPromo": true en products.json oculta el aviso de promoción en esa polera
     $("detalle-promo").textContent = enPromo(p) ? C.promo.detalle : "";
     $("detalle-promo").hidden = !enPromo(p);
