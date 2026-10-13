@@ -2,7 +2,11 @@
   const C = window.CONFIG;
   const $ = (id) => document.getElementById(id);
   let productos = [];
-  let marcaActiva = null;
+  // Vista del catálogo: "inicio" (marcas + destacados), "marca" (una marca) o "todo"
+  let vista = { tipo: "inicio", marca: null };
+  let hashVista = "";       // hash de la vista actual, para volver a ella al cerrar una polera
+  let limite = 12;          // cuántas poleras se muestran antes del botón "Ver más"
+  let busqueda = "";
 
   const linkWhatsapp = (texto) =>
     "https://wa.me/" + C.whatsapp.replace(/\D/g, "") + (texto ? "?text=" + encodeURIComponent(texto) : "");
@@ -23,6 +27,8 @@
   }
 
   // ---------- Datos de la tienda ----------
+  const instagram = C.instagram.replace(/^@/, "");
+  const fono = C.whatsapp.replace(/\D/g, "");
   document.title = C.nombreTienda + " — Catálogo";
   document.querySelectorAll("[data-tienda]").forEach((el) => (el.textContent = C.nombreTienda));
   if (C.logo) {
@@ -34,10 +40,13 @@
       $("logo").setAttribute("aria-label", C.nombreTienda);
     }
   }
-  $("link-instagram").href = "https://instagram.com/" + C.instagram.replace(/^@/, "");
+  $("link-instagram").href = "https://instagram.com/" + instagram;
+  $("link-instagram").textContent = "@" + instagram;
   $("link-whatsapp").href = linkWhatsapp("");
+  $("link-whatsapp").textContent = "+" + fono.replace(/^(\d{2})(\d)(\d{4})(\d{4})$/, "$1 $2 $3 $4");
   // Abre el chat directo (DM) de Instagram; Instagram no permite prellenar el mensaje
-  $("detalle-instagram").href = "https://ig.me/m/" + C.instagram.replace(/^@/, "");
+  $("detalle-instagram").href = "https://ig.me/m/" + instagram;
+  $("anio").textContent = new Date().getFullYear();
 
   if (C.aviso) { $("aviso-promo").textContent = C.aviso; $("aviso-promo").hidden = false; }
 
@@ -109,60 +118,303 @@
     return Object.keys(cuenta).sort((a, b) => cuenta[b] - cuenta[a]);
   }
 
-  function seccion(titulo, lista) {
+  const PASO = 12;
+
+  // Una sección del catálogo. Con "paginar", muestra de a 12 con un botón "Ver más"
+  function seccion(titulo, lista, opciones) {
+    const o = opciones || {};
     const sec = crear("section", "seccion");
     const cabecera = crear("div", "catalogo-cabecera");
-    cabecera.append(crear("h2", "", titulo), crear("span", "", lista.length + (lista.length === 1 ? " producto" : " productos")));
+    cabecera.append(crear("h2", "", titulo));
+    if (o.enlace) {
+      const a = crear("a", "catalogo-enlace", o.enlace.texto);
+      a.href = o.enlace.href;
+      cabecera.append(a);
+    } else {
+      cabecera.append(crear("span", "", lista.length + (lista.length === 1 ? " producto" : " productos")));
+    }
     const grilla = crear("div", "grilla");
-    grilla.append(...lista.map(tarjeta));
+    const visibles = o.paginar ? lista.slice(0, limite) : lista;
+    grilla.append(...visibles.map(tarjeta));
+    sec.append(cabecera, grilla);
+    if (o.paginar && lista.length > visibles.length) {
+      const mas = crear("button", "boton boton-borde ver-mas", "Ver más poleras");
+      mas.type = "button";
+      mas.addEventListener("click", () => { limite += PASO; pintarGrilla(); });
+      sec.append(mas);
+    }
+    return sec;
+  }
+
+  // Foto que representa a una marca: un detalle del estampado de su polera con más fotos
+  function fotoMarca(marca) {
+    if (C.fotosMarca && C.fotosMarca[marca]) return C.fotosMarca[marca];
+    const candidatas = productos.filter((p) => p.marca === marca)
+      .map((p) => p.variantes[0].imagenes).sort((a, b) => b.length - a.length)[0] || [];
+    return candidatas.length >= 6 ? candidatas[5] : candidatas[0] || "";
+  }
+
+  function seccionMarcas() {
+    const sec = crear("section", "seccion");
+    const cabecera = crear("div", "catalogo-cabecera");
+    cabecera.append(crear("h2", "", "Marcas"));
+    const todo = crear("a", "catalogo-enlace", "Ver todo");
+    todo.href = "#todo";
+    cabecera.append(todo);
+    const grilla = crear("div", "marcas");
+    grilla.append(...marcas().map((m) => {
+      const a = crear("a", "marca");
+      a.href = "#m=" + encodeURIComponent(m);
+      const img = crear("img");
+      img.src = miniatura(fotoMarca(m));
+      img.alt = "";
+      img.loading = "lazy";
+      const n = productos.filter((p) => p.marca === m).length;
+      const texto = crear("span", "marca-texto");
+      texto.append(crear("b", "", m), crear("small", "", n + (n === 1 ? " polera" : " poleras")));
+      a.append(img, texto);
+      return a;
+    }));
     sec.append(cabecera, grilla);
     return sec;
   }
 
-  // Sin marca elegida se muestran todas, una sección por marca
+  // Destacados: los ids de config.js o, si no hay, una polera por marca hasta juntar 8
+  function destacados() {
+    if (C.destacados && C.destacados.length) return C.destacados.map((id) => productos.find((p) => p.id === id)).filter(Boolean);
+    const porMarca = marcas().map((m) => productos.filter((p) => p.marca === m));
+    const lista = [];
+    for (let vuelta = 0; lista.length < 8 && vuelta < 8; vuelta++) {
+      porMarca.forEach((ps) => { if (ps[vuelta] && lista.length < 8) lista.push(ps[vuelta]); });
+    }
+    return lista;
+  }
+
+  const sinTildes = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
   function pintarGrilla() {
-    const grupos = (marcaActiva ? [marcaActiva] : marcas())
-      .map((m) => seccion(m, productos.filter((p) => p.marca === m)));
-    const sinMarca = productos.filter((p) => !p.marca);
-    if (sinMarca.length && !marcaActiva) grupos.push(seccion(grupos.length ? "Otras" : "Poleras", sinMarca));
-    $("secciones").replaceChildren(...grupos);
+    $("aviso").hidden = true;
+    const enInicio = vista.tipo === "inicio" && !busqueda;
+    if (bannerListo) $("banner").hidden = !enInicio;
+    $("resenas").hidden = !(enInicio && C.resenas && C.resenas.length);
+    $("preguntas").hidden = !(enInicio && C.preguntas && C.preguntas.length);
+
+    if (busqueda) {
+      const q = sinTildes(busqueda);
+      const lista = productos.filter((p) => sinTildes(p.nombre + " " + (p.marca || "") + " " + p.variantes.map((v) => v.color).join(" ")).includes(q));
+      $("secciones").replaceChildren(...(lista.length ? [seccion("Resultados", lista)] : []));
+      if (!lista.length) { $("aviso").textContent = "No encontramos poleras para “" + busqueda + "”. Prueba con otra marca o nombre."; $("aviso").hidden = false; }
+      return;
+    }
+    if (vista.tipo === "marca") {
+      $("secciones").replaceChildren(seccion(vista.marca, productos.filter((p) => p.marca === vista.marca), { paginar: true }));
+    } else if (vista.tipo === "todo") {
+      $("secciones").replaceChildren(seccion("Todas las poleras", productos, { paginar: true }));
+    } else {
+      $("secciones").replaceChildren(seccionMarcas(), seccion("Destacados", destacados(), { enlace: { texto: "Ver todo", href: "#todo" } }));
+    }
   }
 
   function pintarMenu() {
-    const enlace = (texto, marca) => {
-      const b = crear("button", "", texto);
-      b.type = "button";
-      b.setAttribute("aria-pressed", String(marca === marcaActiva));
-      b.addEventListener("click", () => {
-        marcaActiva = marca;
-        pintarMenu();
-        pintarGrilla();
-        $("catalogo").scrollIntoView({ behavior: "smooth" });
-      });
-      return b;
+    const enlace = (texto, href, activo) => {
+      const a = crear("a", "", texto);
+      a.href = href;
+      if (activo && !busqueda) a.setAttribute("aria-current", "page");
+      return a;
     };
-    const ancla = (texto, id) => { const a = crear("a", "", texto); a.href = "#" + id; return a; };
-    const extras = [];
-    if (C.resenas && C.resenas.length) extras.push(ancla("Reseñas", "resenas"));
-    if (C.preguntas && C.preguntas.length) extras.push(ancla("Preguntas", "preguntas"));
-    $("menu").replaceChildren(enlace("Todo", null), ...marcas().map((m) => enlace(m, m)), ...extras, ancla("Contacto", "contacto"));
+    const items = [
+      enlace("Inicio", "#", vista.tipo === "inicio"),
+      enlace("Todo", "#todo", vista.tipo === "todo"),
+      ...marcas().map((m) => enlace(m, "#m=" + encodeURIComponent(m), vista.tipo === "marca" && vista.marca === m)),
+    ];
+    if (C.resenas && C.resenas.length) items.push(enlace("Reseñas", "#resenas"));
+    if (C.preguntas && C.preguntas.length) items.push(enlace("Preguntas", "#preguntas"));
+    items.push(enlace("Contacto", "#contacto"));
+    $("menu").replaceChildren(...items);
+    const activo = $("menu").querySelector("[aria-current]");
+    if (activo && activo.scrollIntoView) activo.scrollIntoView({ block: "nearest", inline: "center" });
   }
 
-  function pintarBanner() {
-    const ruta = C.bannerImagen || (productos[0] && productos[0].imagenes[0]);
-    if (!ruta) return;
-    $("banner-img").src = ruta;
-    $("banner-titulo").textContent = C.bannerTitulo;
-    $("banner-boton").textContent = C.bannerBoton;
-    $("banner").hidden = false;
+  function limpiarBusqueda() {
+    busqueda = "";
+    $("buscar").value = "";
+    $("buscador").hidden = true;
+    $("abrir-buscador").setAttribute("aria-expanded", "false");
   }
+
+  // ---------- Buscador ----------
+  function mostrarBuscador(ver) {
+    $("buscador").hidden = !ver;
+    $("abrir-buscador").setAttribute("aria-expanded", String(ver));
+    if (ver) $("buscar").focus();
+    else if (busqueda) { busqueda = ""; $("buscar").value = ""; pintarMenu(); pintarGrilla(); }
+    else $("buscar").value = "";
+  }
+  $("abrir-buscador").addEventListener("click", () => mostrarBuscador($("buscador").hidden));
+  $("cerrar-buscador").addEventListener("click", () => mostrarBuscador(false));
+  $("buscador").addEventListener("submit", (e) => { e.preventDefault(); $("catalogo").scrollIntoView({ behavior: "smooth" }); $("buscar").blur(); });
+  $("buscar").addEventListener("input", () => {
+    const antes = busqueda;
+    busqueda = $("buscar").value.trim();
+    pintarMenu(); pintarGrilla();
+    if (busqueda && !antes) window.scrollTo(0, 0);
+  });
+
+  // ---------- Banner (carrusel) ----------
+  let bannerListo = false;
+  function pintarBanner() {
+    const laminas = (C.banners && C.banners.length ? C.banners : [{ imagen: C.bannerImagen || (productos[0] && productos[0].imagenes[0]), titulo: C.bannerTitulo, boton: C.bannerBoton }])
+      .filter((b) => b && b.imagen);
+    if (!laminas.length) return;
+    let actual = 0, reloj = null;
+    const pista = $("banner-pista");
+    const vistas = laminas.map((b, i) => {
+      const lam = crear("div", "banner-lamina");
+      lam.setAttribute("aria-hidden", String(i !== 0));
+      const img = crear("img");
+      img.src = b.imagen;
+      img.alt = "";
+      if (i === 0) img.fetchPriority = "high"; else img.loading = "lazy";
+      const texto = crear("div", "banner-texto");
+      texto.append(crear(i === 0 ? "h1" : "p", "banner-titulo", b.titulo || ""));
+      const boton = crear("button", "boton boton-claro", b.boton || "Ver poleras");
+      boton.type = "button";
+      boton.addEventListener("click", () => { location.hash = b.marca ? "m=" + encodeURIComponent(b.marca) : "todo"; });
+      texto.append(boton);
+      lam.append(img, texto);
+      return lam;
+    });
+    pista.replaceChildren(...vistas);
+    const mostrar = (i) => {
+      actual = (i + laminas.length) % laminas.length;
+      vistas.forEach((v, k) => {
+        v.classList.toggle("activa", k === actual);
+        v.setAttribute("aria-hidden", String(k !== actual));
+        v.querySelector("button").tabIndex = k === actual ? 0 : -1;
+      });
+    };
+    const sinAnimacion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const andar = () => { clearInterval(reloj); if (laminas.length > 1 && !sinAnimacion) reloj = setInterval(() => mostrar(actual + 1), 6000); };
+    if (laminas.length > 1) {
+      $("banner-controles").hidden = false;
+      $("banner-izq").addEventListener("click", () => { mostrar(actual - 1); andar(); });
+      $("banner-der").addEventListener("click", () => { mostrar(actual + 1); andar(); });
+      // Deslizar con el dedo
+      let x0 = null;
+      pista.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+      pista.addEventListener("touchend", (e) => {
+        if (x0 === null) return;
+        const dx = e.changedTouches[0].clientX - x0; x0 = null;
+        if (Math.abs(dx) > 40) { mostrar(actual + (dx < 0 ? 1 : -1)); andar(); }
+      });
+    }
+    mostrar(0);
+    andar();
+    bannerListo = true;
+  }
+
+  // ---------- Carrito ----------
+  // Se guarda en el navegador de cada visitante. Cada línea: {id, color (índice), talla, cant}
+  const CLAVE = "resevn-carrito";
+  let carrito = [];
+  try { carrito = JSON.parse(localStorage.getItem(CLAVE) || "[]") || []; } catch (e) { carrito = []; }
+  if (!Array.isArray(carrito)) carrito = [];
+  const guardarCarrito = () => { try { localStorage.setItem(CLAVE, JSON.stringify(carrito)); } catch (e) {} };
+
+  // Líneas del carrito con su producto (las de poleras que ya no existen se descartan)
+  function lineas() {
+    return carrito.map((l) => {
+      const p = productos.find((x) => x.id === l.id);
+      const v = p && (p.variantes[l.color] || p.variantes[0]);
+      return p ? { l, p, v, precio: Number(p.precio) || 0 } : null;
+    }).filter(Boolean);
+  }
+
+  function totales() {
+    const ls = lineas();
+    const unidades = ls.reduce((a, x) => a + x.l.cant, 0);
+    const subtotal = ls.reduce((a, x) => a + x.precio * x.l.cant, 0);
+    const elegibles = ls.reduce((a, x) => a + (enPromo(x.p) ? x.l.cant : 0), 0);
+    const pares = C.promo ? Math.floor(elegibles / 2) : 0;
+    const descuento = C.promo ? pares * Math.max(0, 2 * C.promo.precioUnidad - C.promo.precioPar) : 0;
+    return { ls, unidades, subtotal, elegibles, pares, descuento, total: subtotal - descuento };
+  }
+
+  function mensajePedido(t) {
+    const filas = t.ls.map((x) => "• " + x.l.cant + " x " + x.p.nombre + (x.v && x.v.color ? " — " + x.v.color : "") + (x.l.talla ? " — talla " + x.l.talla : "") + (x.precio ? " (" + formatoPrecio(x.precio * x.l.cant) + ")" : ""));
+    return ["Hola! Quiero hacer este pedido:", ...filas,
+      t.descuento ? "Promo 2 x " + formatoPrecio(C.promo.precioPar) + (t.pares > 1 ? " (" + t.pares + " pares)" : "") + ": −" + formatoPrecio(t.descuento) : "",
+      "Total: " + formatoPrecio(t.total)].filter(Boolean).join("\n");
+  }
+
+  function pintarCarrito() {
+    const t = totales();
+    $("carrito-cuenta").textContent = t.unidades;
+    $("carrito-cuenta").hidden = !t.unidades;
+    $("abrir-carrito").setAttribute("aria-label", "Abrir carrito (" + t.unidades + (t.unidades === 1 ? " polera)" : " poleras)"));
+
+    const lista = $("carrito-lista");
+    if (!t.ls.length) {
+      lista.replaceChildren(crear("p", "carrito-vacio", "Tu carrito está vacío. Elige una polera, su talla y toca “Agregar al carrito”."));
+    } else {
+      lista.replaceChildren(...t.ls.map((x) => {
+        const fila = crear("article", "carrito-item");
+        const img = crear("img");
+        img.src = miniatura((x.v && x.v.imagenes[0]) || x.p.imagenes[0] || "");
+        img.alt = "";
+        const info = crear("div", "carrito-info");
+        info.append(crear("p", "carrito-nombre", x.p.nombre));
+        info.append(crear("p", "carrito-detalle", [x.v && x.v.color, x.l.talla && "Talla " + x.l.talla].filter(Boolean).join(" · ")));
+        const fila2 = crear("div", "carrito-cant");
+        const boton = (texto, etiqueta, accion) => { const b = crear("button", "", texto); b.type = "button"; b.setAttribute("aria-label", etiqueta); b.addEventListener("click", accion); return b; };
+        fila2.append(
+          boton("−", "Quitar una", () => { x.l.cant -= 1; if (x.l.cant < 1) carrito = carrito.filter((l) => l !== x.l); guardarCarrito(); pintarCarrito(); }),
+          crear("span", "", String(x.l.cant)),
+          boton("+", "Agregar una", () => { x.l.cant = Math.min(20, x.l.cant + 1); guardarCarrito(); pintarCarrito(); }),
+          boton("Quitar", "Quitar del carrito", () => { carrito = carrito.filter((l) => l !== x.l); guardarCarrito(); pintarCarrito(); })
+        );
+        fila2.lastChild.className = "carrito-quitar";
+        info.append(fila2);
+        fila.append(img, info, crear("p", "carrito-precio", x.precio ? formatoPrecio(x.precio * x.l.cant) : "A consultar"));
+        return fila;
+      }));
+    }
+
+    // Avance hacia la promo 2x
+    const promo = $("carrito-promo");
+    promo.hidden = !(C.promo && t.elegibles > 0);
+    if (!promo.hidden) {
+      const falta = t.elegibles % 2 === 1;
+      $("carrito-promo-texto").textContent = falta
+        ? "Agrega 1 polera de " + formatoPrecio(C.promo.precioUnidad) + " más y llevas 2 por " + formatoPrecio(C.promo.precioPar) + " con envío incluido"
+        : "Promo 2 x " + formatoPrecio(C.promo.precioPar) + " aplicada · Envío incluido";
+      $("carrito-barra").style.width = falta ? "50%" : "100%";
+    }
+
+    const fila = (dt, dd, clase) => { const d = crear("div", clase || ""); d.append(crear("dt", "", dt), crear("dd", "", dd)); return d; };
+    $("carrito-totales").replaceChildren(...[
+      t.descuento ? fila("Subtotal", formatoPrecio(t.subtotal)) : null,
+      t.descuento ? fila("Promo 2 x " + formatoPrecio(C.promo.precioPar), "−" + formatoPrecio(t.descuento)) : null,
+      fila("Total", formatoPrecio(t.total), "carrito-total"),
+    ].filter(Boolean));
+
+    const pedir = $("carrito-pedir");
+    pedir.hidden = !t.ls.length;
+    if (t.ls.length) pedir.href = linkWhatsapp(mensajePedido(t));
+  }
+
+  function mostrarCarrito(ver) {
+    $("carrito").hidden = !ver;
+    document.body.classList.toggle("sin-scroll", ver || !$("detalle").hidden);
+    if (ver) { pintarCarrito(); $("cerrar-carrito").focus(); }
+  }
+  $("abrir-carrito").addEventListener("click", () => mostrarCarrito(true));
+  $("cerrar-carrito").addEventListener("click", () => mostrarCarrito(false));
+  $("carrito-seguir").addEventListener("click", () => mostrarCarrito(false));
+  $("carrito").addEventListener("click", (e) => { if (e.target === $("carrito")) mostrarCarrito(false); });
 
   // ---------- Detalle ----------
-  function chips(idGrupo, valores) {
-    const grupo = $(idGrupo);
-    grupo.hidden = !valores.length;
-    grupo.querySelector("ul").replaceChildren(...valores.map((v) => crear("li", "", v)));
-  }
+  let enDetalle = null;   // {p, color, talla} de la polera abierta
 
   // Galería: se desliza con el dedo, con las flechas, con los puntos o con las teclas ← →
   let irAFoto = () => {};
@@ -207,18 +459,35 @@
     marcar();
   }
 
+  function actualizarConsulta() {
+    const { p, color, talla } = enDetalle;
+    const v = p.variantes[color];
+    const partes = [p.variantes.length > 1 ? "color " + v.color : "", talla ? "talla " + talla : ""].filter(Boolean);
+    const consulta = p.nombre + (partes.length ? " (" + partes.join(", ") + ")" : "");
+    $("detalle-whatsapp").href = linkWhatsapp(C.mensajeWhatsapp.replace("{nombre}", consulta));
+  }
+
   // Elige un color: cambia las fotos, el texto "Color: X" y el mensaje de WhatsApp
   function elegirColor(p, indice) {
     const v = p.variantes[indice];
+    enDetalle.color = indice;
     // Orden de la galería: frente, espalda, detalles y, al final, la guía de tallas
     pintarFotos(p, C.guiaTallas ? v.imagenes.concat(C.guiaTallas) : v.imagenes);
     $("detalle-color-actual").textContent = v.color;
     $("detalle-colores").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === indice)));
-    const consulta = p.variantes.length > 1 ? p.nombre + " (color " + v.color + ")" : p.nombre;
-    $("detalle-whatsapp").href = linkWhatsapp(C.mensajeWhatsapp.replace("{nombre}", consulta));
+    actualizarConsulta();
+  }
+
+  function elegirTalla(talla) {
+    enDetalle.talla = talla;
+    $("detalle-talla-actual").textContent = talla || "";
+    $("detalle-tallas").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === talla)));
+    $("detalle-error").hidden = true;
+    actualizarConsulta();
   }
 
   function abrirDetalle(p) {
+    enDetalle = { p, color: 0, talla: p.tallas.length === 1 ? p.tallas[0] : "" };
     $("detalle-marca").textContent = p.marca || "";
     $("detalle-nombre").textContent = p.nombre;
     const precio = formatoPrecio(p.precio);
@@ -227,7 +496,19 @@
     // "sinPromo": true en products.json oculta el aviso de promoción en esa polera
     $("detalle-promo").textContent = enPromo(p) ? C.promo.detalle : "";
     $("detalle-promo").hidden = !enPromo(p);
-    chips("detalle-tallas", p.tallas);
+    $("detalle-error").hidden = true;
+    $("detalle-agregar").textContent = "Agregar al carrito";
+
+    const tallas = $("detalle-tallas");
+    tallas.hidden = !p.tallas.length;
+    tallas.querySelector("ul").replaceChildren(...p.tallas.map((t) => {
+      const li = crear("li");
+      const b = crear("button", "", t);
+      b.type = "button";
+      b.addEventListener("click", () => elegirTalla(t));
+      li.append(b);
+      return li;
+    }));
 
     const colores = $("detalle-colores");
     colores.hidden = !p.variantes.some((v) => v.color);
@@ -254,23 +535,58 @@
     document.body.classList.add("sin-scroll");
     $("detalle").scrollTop = 0;
     elegirColor(p, 0);
+    elegirTalla(enDetalle.talla);
   }
+
+  $("detalle-agregar").addEventListener("click", () => {
+    if (!enDetalle) return;
+    const { p, color, talla } = enDetalle;
+    if (p.tallas.length && !talla) {
+      $("detalle-error").textContent = "Elige una talla para agregarla al carrito.";
+      $("detalle-error").hidden = false;
+      return;
+    }
+    const igual = carrito.find((l) => l.id === p.id && l.color === color && l.talla === talla);
+    if (igual) igual.cant = Math.min(20, igual.cant + 1);
+    else carrito.push({ id: p.id, color, talla, cant: 1 });
+    guardarCarrito();
+    pintarCarrito();
+    mostrarCarrito(true);
+  });
 
   function cerrarDetalle() {
     $("detalle").hidden = true;
-    document.body.classList.remove("sin-scroll");
+    enDetalle = null;
+    document.body.classList.toggle("sin-scroll", !$("carrito").hidden);
   }
 
-  // El detalle vive en el hash (#p=id): el botón "atrás" del celular lo cierra
-  // y cada polera tiene su propio link para compartir.
+  // Todo vive en el hash, así el botón "atrás" del celular funciona y cada vista tiene su link:
+  //   #p=id  una polera (se abre sobre la vista actual)   #m=Marca  una marca   #todo  todas   (vacío) inicio
   function ruta() {
-    const m = location.hash.match(/^#p=(.+)$/);
-    const p = m && productos.find((x) => x.id === decodeURIComponent(m[1]));
-    if (p) abrirDetalle(p); else cerrarDetalle();
+    const h = location.hash;
+    const mp = h.match(/^#p=(.+)$/);
+    const p = mp && productos.find((x) => x.id === decodeURIComponent(mp[1]));
+    if (p) return abrirDetalle(p);
+    cerrarDetalle();
+
+    const mm = h.match(/^#m=(.+)$/);
+    const marca = mm && marcas().find((m) => m === decodeURIComponent(mm[1]));
+    const ancla = /^#(preguntas|resenas|contacto)$/.test(h) ? h.slice(1) : "";
+    if (ancla === "contacto") { $("contacto").scrollIntoView(); return; }   // el contacto está en todas las vistas
+
+    const nueva = marca ? { tipo: "marca", marca } : h === "#todo" ? { tipo: "todo", marca: null } : { tipo: "inicio", marca: null };
+    const cambio = nueva.tipo !== vista.tipo || nueva.marca !== vista.marca || !!busqueda;
+    if (cambio) { vista = nueva; limite = PASO; limpiarBusqueda(); }
+    hashVista = marca || h === "#todo" ? h : "";
+    pintarMenu();
+    pintarGrilla();
+    if (ancla) $(ancla).scrollIntoView();
+    else if (cambio) window.scrollTo(0, 0);
   }
 
+  // Cierra la polera y vuelve a la vista donde estaba el visitante
   function salirDetalle() {
-    history.pushState("", document.title, location.pathname + location.search);
+    history.pushState("", document.title, location.pathname + location.search + hashVista);
     cerrarDetalle();
   }
 
@@ -279,6 +595,7 @@
   $("flecha-izq").addEventListener("click", () => irAFoto(-1, true));
   $("flecha-der").addEventListener("click", () => irAFoto(1, true));
   document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("carrito").hidden) return mostrarCarrito(false);
     if ($("detalle").hidden) return;
     if (e.key === "Escape") salirDetalle();
     if (e.key === "ArrowLeft") irAFoto(-1, true);
@@ -303,6 +620,7 @@
       pintarBanner();
       pintarMenu();
       pintarGrilla();
+      pintarCarrito();
       if (!productos.length) { $("aviso").textContent = "Pronto nuevos productos."; $("aviso").hidden = false; }
       ruta();
     })

@@ -27,6 +27,7 @@ window.CONFIG = {
   // (y que no tengan "sinPromo": true en products.json). null = sin promoción.
   promo: {
     precioUnidad: 26990,
+    precioPar: 49990,   // lo que se paga por 2 poleras en promoción
     etiqueta: "",   // texto sobre la foto en el catálogo, ej: "2 x $49.990". "" = sin etiqueta
     detalle: "Promo: lleva 2 poleras de $26.990 por $49.990 · Envío incluido",
   },
@@ -46,7 +47,7 @@ window.CONFIG = {
   // Preguntas frecuentes: p = pregunta, r = respuesta
   preguntas: [
     { p: "¿Cómo compro?",
-      r: "Elige tu polera, talla y color. Luego toca “Consultar por WhatsApp” o “Consultar por Instagram”: te confirmamos disponibilidad, forma de pago y entrega." },
+      r: "Elige tu polera, su talla y color, y agrégala al carrito. Al terminar, abre el carrito y toca “Pedir por WhatsApp”: te confirmamos disponibilidad, forma de pago y entrega. Si prefieres preguntar antes, usa los botones de consulta de cada polera." },
     { p: "¿Cuánto demora en llegar?",
       r: "Trabajamos por encargo. La entrega estimada es de 1 a 2 semanas desde que confirmas tu pedido." },
     { p: "¿Hacen envíos a todo Chile?",
@@ -61,11 +62,19 @@ window.CONFIG = {
       r: "Escríbenos por WhatsApp o Instagram con los botones de más abajo y te respondemos." },
   ],
 
-  // Texto del banner principal
-  bannerTitulo: "NUEVA COLECCIÓN",
-  bannerBoton: "VER POLERAS",
+  // Fotos grandes del inicio (carrusel). Cada una: imagen, título, texto del botón y,
+  // opcionalmente, la marca que abre el botón (sin "marca", abre todas las poleras).
+  banners: [
+    { imagen: "img/polera-valley-dreams-ufo-negro-06.webp", titulo: "Nueva colección", boton: "Ver todo" },
+    { imagen: "img/polera-life-hustlers-astronauta-negro-06.webp", titulo: "Life Hustlers", boton: "Ver poleras", marca: "Life Hustlers" },
+    { imagen: "img/polera-supply-aliens-negro-06.webp", titulo: "Supply", boton: "Ver poleras", marca: "Supply" },
+    { imagen: "img/polera-mixed-emotion-alas-rojas-negro-05.webp", titulo: "Mixed Emotion", boton: "Ver poleras", marca: "Mixed Emotion" },
+  ],
 
-  // Foto del banner. Déjalo en null para usar la primera foto del primer producto,
-  // o pon la ruta de una foto, ej: "img/polera-valley-dreams-ufo-negro-06.webp"
-  bannerImagen: "img/polera-valley-dreams-ufo-negro-06.webp",
+  // Poleras destacadas en el inicio: lista de "id" de products.json.
+  // Vacío = se elige sola una polera por marca.
+  destacados: [],
+
+  // Foto de cada marca en el inicio (opcional). Ej: { "Hellstar": "img/polera-hellstar-logo-negro-05.webp" }
+  fotosMarca: {},
 };

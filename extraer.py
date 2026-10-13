@@ -212,8 +212,9 @@ def main():
 
     JSON.write_text(json.dumps(productos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     # Cambia la versión de los archivos en index.html para que los navegadores no usen copias viejas
-    indice = RAIZ / "index.html"
-    indice.write_text(re.sub(r"\?v=\d+", f"?v={int(time.time())}", indice.read_text(encoding="utf-8")), encoding="utf-8")
+    for pagina in (RAIZ / "index.html", RAIZ / "politicas.html"):
+        if pagina.exists():
+            pagina.write_text(re.sub(r"\?v=\d+", f"?v={int(time.time())}", pagina.read_text(encoding="utf-8")), encoding="utf-8")
     print(f"Total en products.json: {len(productos)}")
     for clave, items in reporte.items():
         print(f"\n{clave.upper()} ({len(items)})")

@@ -3,28 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Catálogo</title>
-  <meta name="description" content="Catálogo de poleras. Consulta por WhatsApp.">
-  <meta name="theme-color" content="#ffffff">
+  <title>RESEVN — Poleras streetwear</title>
+  <meta name="description" content="Poleras streetwear por encargo con envío a todo Chile. Hellstar, Mixed Emotion, Life Hustlers, Valley Dreams y más.">
+  <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791854191">
+  <link rel="stylesheet" href="styles.css?v=1791854843">
 </head>
 <body>
 
   <p class="aviso-promo" id="aviso-promo" hidden></p>
 
   <header class="header">
-    <a class="logo" href="#" id="logo"><img id="logo-img" alt="" hidden><span id="logo-texto" data-tienda></span></a>
-    <nav class="menu" id="menu" aria-label="Marcas"></nav>
+    <div class="header-fila">
+      <a class="logo" href="#" id="logo"><img id="logo-img" alt="" hidden><span id="logo-texto" data-tienda></span></a>
+      <div class="header-iconos">
+        <button class="icono" id="abrir-buscador" type="button" aria-label="Buscar" aria-expanded="false" aria-controls="buscador">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+        </button>
+        <button class="icono" id="abrir-carrito" type="button" aria-label="Abrir carrito">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+          <span class="icono-cuenta" id="carrito-cuenta" hidden>0</span>
+        </button>
+      </div>
+    </div>
+    <nav class="menu" id="menu" aria-label="Secciones"></nav>
+    <form class="buscador" id="buscador" role="search" hidden>
+      <input id="buscar" type="search" placeholder="Buscar polera o marca" aria-label="Buscar polera o marca" autocomplete="off">
+      <button type="button" id="cerrar-buscador" aria-label="Cerrar buscador">✕</button>
+    </form>
   </header>
 
   <main>
-    <section class="banner" id="banner" hidden>
-      <img id="banner-img" alt="" fetchpriority="high">
-      <div class="banner-texto">
-        <h1 id="banner-titulo"></h1>
-        <a class="boton boton-claro" href="#catalogo" id="banner-boton"></a>
+    <section class="banner" id="banner" aria-roledescription="carrusel" aria-label="Destacados" hidden>
+      <div class="banner-pista" id="banner-pista"></div>
+      <div class="banner-controles" id="banner-controles" hidden>
+        <button type="button" id="banner-izq" aria-label="Foto anterior">&#8249;</button>
+        <button type="button" id="banner-der" aria-label="Foto siguiente">&#8250;</button>
       </div>
     </section>
 
@@ -32,26 +47,35 @@
       <div id="secciones"></div>
       <p class="aviso" id="aviso" hidden></p>
     </section>
+
+    <section class="extra" id="resenas" hidden>
+      <h2>Reseñas</h2>
+      <div class="resenas" id="lista-resenas"></div>
+    </section>
+
+    <section class="extra" id="preguntas" hidden>
+      <h2>Preguntas frecuentes</h2>
+      <div class="preguntas" id="lista-preguntas"></div>
+    </section>
   </main>
 
-  <section class="extra" id="resenas" hidden>
-    <h2>Reseñas</h2>
-    <div class="resenas" id="lista-resenas"></div>
-  </section>
-
-  <section class="extra" id="preguntas" hidden>
-    <h2>Preguntas frecuentes</h2>
-    <div class="preguntas" id="lista-preguntas"></div>
-  </section>
-
   <footer class="footer" id="contacto">
-    <p class="footer-logo" data-tienda></p>
-    <nav class="footer-links" aria-label="Contacto">
-      <a id="link-instagram" target="_blank" rel="noopener">Instagram</a>
-      <a id="link-whatsapp" target="_blank" rel="noopener">WhatsApp</a>
-    </nav>
-    <p class="footer-nota">Consultas y pedidos por WhatsApp o Instagram</p>
-    <p class="footer-nota" data-entrega hidden></p>
+    <div class="footer-cuerpo">
+      <div class="footer-col">
+        <p class="footer-logo" data-tienda></p>
+        <p><b>Instagram:</b> <a id="link-instagram" target="_blank" rel="noopener"></a></p>
+        <p><b>WhatsApp:</b> <a id="link-whatsapp" target="_blank" rel="noopener"></a></p>
+        <p class="footer-nota" data-entrega hidden></p>
+      </div>
+      <nav class="footer-col footer-links" aria-label="Políticas">
+        <a href="politicas.html#cambios">Cambios y devoluciones</a>
+        <a href="politicas.html#reembolsos">Política de reembolsos</a>
+        <a href="politicas.html#envios">Política de envíos</a>
+        <a href="politicas.html#privacidad">Política de privacidad</a>
+        <a href="politicas.html#terminos">Términos y condiciones</a>
+      </nav>
+    </div>
+    <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span></p>
   </footer>
 
   <!-- Detalle de producto -->
@@ -70,21 +94,44 @@
         <p class="detalle-precio" id="detalle-precio" hidden></p>
         <p class="detalle-promo" id="detalle-promo" hidden></p>
         <div class="detalle-grupo" id="detalle-tallas" hidden>
-          <h3>Tallas</h3>
+          <h3>Talla: <span id="detalle-talla-actual"></span></h3>
           <ul class="chips"></ul>
         </div>
         <div class="detalle-grupo" id="detalle-colores" hidden>
           <h3>Color: <span id="detalle-color-actual"></span></h3>
           <ul class="muestras"></ul>
         </div>
-        <a class="boton boton-oscuro" id="detalle-whatsapp" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+        <p class="detalle-error" id="detalle-error" role="alert" hidden></p>
+        <button class="boton boton-oscuro" id="detalle-agregar" type="button">Agregar al carrito</button>
+        <a class="boton boton-whatsapp" id="detalle-whatsapp" target="_blank" rel="noopener">Consultar por WhatsApp</a>
         <a class="boton boton-borde" id="detalle-instagram" target="_blank" rel="noopener">Consultar por Instagram</a>
         <p class="detalle-entrega" data-entrega hidden></p>
       </div>
     </div>
   </div>
 
-  <script src="config.js?v=1791854191"></script>
-  <script src="app.js?v=1791854191"></script>
+  <!-- Carrito -->
+  <div class="carrito" id="carrito" role="dialog" aria-modal="true" aria-labelledby="carrito-titulo" hidden>
+    <div class="carrito-panel">
+      <div class="carrito-cabecera">
+        <h2 id="carrito-titulo">Carrito</h2>
+        <button type="button" id="cerrar-carrito" aria-label="Cerrar carrito">✕</button>
+      </div>
+      <div class="carrito-promo" id="carrito-promo" hidden>
+        <p id="carrito-promo-texto"></p>
+        <div class="carrito-barra"><span id="carrito-barra"></span></div>
+      </div>
+      <div class="carrito-lista" id="carrito-lista"></div>
+      <div class="carrito-pie">
+        <dl class="carrito-totales" id="carrito-totales"></dl>
+        <p class="carrito-nota">El pedido se envía por WhatsApp. Ahí confirmamos disponibilidad, pago y entrega.</p>
+        <a class="boton boton-whatsapp" id="carrito-pedir" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+        <button class="boton boton-borde" id="carrito-seguir" type="button">Continuar comprando</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js?v=1791854843"></script>
+  <script src="app.js?v=1791854843"></script>
 </body>
 </html>
