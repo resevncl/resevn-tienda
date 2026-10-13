@@ -356,15 +356,12 @@
     return { ls, unidades, subtotal, elegibles, pares, descuento, productos, envio, envioGratis, total: productos + envio };
   }
 
-  const comentario = () => $("carrito-comentario").value.trim().slice(0, 200);
-
   function mensajePedido(t) {
     const filas = t.ls.map((x) => "• " + x.l.cant + " x " + x.p.nombre + (x.v && x.v.color ? " — " + x.v.color : "") + (x.l.talla ? " — talla " + x.l.talla : "") + (x.precio ? " (" + formatoPrecio(x.precio * x.l.cant) + ")" : ""));
     return ["Hola! Quiero hacer este pedido:", ...filas,
       t.descuento ? "Promo 2 x " + formatoPrecio(C.promo.precioPar) + (t.pares > 1 ? " (" + t.pares + " pares)" : "") + ": −" + formatoPrecio(t.descuento) : "",
       ENVIO ? "Envío: " + (t.envioGratis ? "gratis" : formatoPrecio(t.envio)) : "",
-      "Total: " + formatoPrecio(t.total),
-      comentario() ? "Comentario: " + comentario() : ""].filter(Boolean).join("\n");
+      "Total: " + formatoPrecio(t.total)].filter(Boolean).join("\n");
   }
 
   // Poleras para sugerir en el carrito: primero las que completan la promo, luego de las mismas marcas
@@ -388,7 +385,13 @@
 
     const lista = $("carrito-items");
     if (!t.ls.length) {
-      lista.replaceChildren(crear("p", "carrito-vacio", "Tu carrito está vacío. Elige una polera, su talla y toca “Comprar ahora”."));
+      const vacio = crear("div", "carrito-vacio");
+      vacio.append(crear("p", "carrito-vacio-titulo", "Tu carrito está vacío"));
+      const gancho = C.promo
+        ? "Lleva 2 poleras de " + formatoPrecio(C.promo.precioUnidad) + " por " + formatoPrecio(C.promo.precioPar) + (ENVIO && C.promo.precioPar >= ENVIO.gratisDesde ? " con envío gratis." : ".")
+        : ENVIO ? "Envío gratis en compras desde " + formatoPrecio(ENVIO.gratisDesde) + "." : "";
+      if (gancho) vacio.append(crear("p", "", gancho));
+      lista.replaceChildren(vacio);
     } else {
       lista.replaceChildren(...t.ls.map((x) => {
         const fila = crear("article", "carrito-item");
@@ -412,12 +415,11 @@
         return fila;
       }));
     }
-    $("carrito-comentario-caja").hidden = !t.ls.length;
 
-    // Sugerencias para sumar otra polera
-    const sugeridas = t.ls.length ? recomendadas(t) : [];
+    // Sugerencias: con el carrito vacío invitan a empezar; con poleras, a sumar otra
+    const sugeridas = recomendadas(t);
     $("carrito-sugeridas").hidden = !sugeridas.length;
-    $("carrito-sugeridas-titulo").textContent = ENVIO && !t.envioGratis ? "Suma otra y llega al envío gratis" : "También te puede gustar";
+    $("carrito-sugeridas-titulo").textContent = !t.ls.length ? "Te pueden gustar" : ENVIO && !t.envioGratis ? "Suma otra y llega al envío gratis" : "También te puede gustar";
     $("carrito-sugeridas-lista").replaceChildren(...sugeridas.map((p) => {
       const a = crear("a", "sugerida");
       a.href = "#p=" + p.id;
@@ -445,6 +447,7 @@
     }
 
     const fila = (dt, dd, clase) => { const d = crear("div", clase || ""); d.append(crear("dt", "", dt), crear("dd", "", dd)); return d; };
+    $("carrito-totales").hidden = !t.ls.length;
     $("carrito-totales").replaceChildren(...[
       t.descuento || ENVIO ? fila("Subtotal", formatoPrecio(t.subtotal)) : null,
       t.descuento ? fila("Promo 2 x " + formatoPrecio(C.promo.precioPar), "−" + formatoPrecio(t.descuento)) : null,
@@ -453,14 +456,12 @@
     ].filter(Boolean));
 
     const pedir = $("carrito-pedir");
-    pedir.hidden = !t.ls.length;
+    // Con pago en línea no se ofrece comprar por WhatsApp; sin él, es la única forma de pedir
+    pedir.hidden = !t.ls.length || conPago;
     if (t.ls.length) pedir.href = linkWhatsapp(mensajePedido(t));
     if (!t.ls.length) pasoCarrito("lista");
     else pasoCarrito($("carrito-datos").hidden ? "lista" : "datos");
   }
-  $("carrito-comentario").addEventListener("input", () => {
-    if (carrito.length) $("carrito-pedir").href = linkWhatsapp(mensajePedido(totales()));
-  });
 
   // ---------- Pago en línea ----------
   // Solo se activa si config.js tiene la dirección del servicio de pagos (pago.url).
@@ -473,10 +474,9 @@
     $("carrito-lista").hidden = datos;
     $("carrito-pagar").hidden = !(conPago && hay) || datos;
     $("carrito-confirmar").hidden = !datos;
-    $("carrito-pedir").textContent = conPago ? "Prefiero comprar por WhatsApp" : "Comprar por WhatsApp";
-    $("carrito-pedir").className = "boton " + (conPago ? "boton-borde" : "boton-whatsapp");
-    $("carrito-nota").hidden = conPago;
-    $("carrito-seguir").textContent = datos ? "Volver al carrito" : "Continuar comprando";
+    $("carrito-nota").hidden = conPago || !hay;
+    $("carrito-seguir").textContent = datos ? "Volver al carrito" : hay ? "Seguir viendo poleras" : "Ver poleras";
+    $("carrito-seguir").className = "boton " + (hay ? "boton-borde" : "boton-oscuro");
     $("carrito-titulo").textContent = datos ? "Finalizar compra" : "Carrito";
     if (!datos) $("carrito-error").hidden = true;
   }
@@ -503,14 +503,14 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: carrito.map((l) => ({ id: l.id, color: l.color, talla: l.talla, cant: l.cant })),
-          cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"), direccion: valor("pg-direccion"), comuna: valor("pg-comuna"), region: valor("pg-region"), nota: comentario() },
+          cliente: { nombre: valor("pg-nombre"), telefono: valor("pg-telefono"), email: valor("pg-email"), direccion: valor("pg-direccion"), comuna: valor("pg-comuna"), region: valor("pg-region") },
         }),
       });
       const datos = await r.json().catch(() => ({}));
       if (r.ok && datos.url) { location.href = datos.url; return; }
-      err.textContent = ERRORES_PAGO[datos.error] || "No pudimos iniciar el pago. Inténtalo de nuevo en un momento o compra por WhatsApp.";
+      err.textContent = ERRORES_PAGO[datos.error] || "No pudimos iniciar el pago. Inténtalo de nuevo en un momento o escríbenos.";
     } catch (x) {
-      err.textContent = "No pudimos conectar con el servicio de pago. Revisa tu conexión o compra por WhatsApp.";
+      err.textContent = "No pudimos conectar con el servicio de pago. Revisa tu conexión o escríbenos.";
     }
     err.hidden = false;
     boton.disabled = false;
@@ -525,7 +525,10 @@
   $("abrir-carrito").addEventListener("click", () => mostrarCarrito(true));
   $("cerrar-carrito").addEventListener("click", () => mostrarCarrito(false));
   $("carrito-seguir").addEventListener("click", () => {
-    if (!$("carrito-datos").hidden) pasoCarrito("lista"); else mostrarCarrito(false);
+    if (!$("carrito-datos").hidden) return pasoCarrito("lista");
+    const vacio = !carrito.length;
+    mostrarCarrito(false);
+    if (vacio) location.hash = "#todo";
   });
   $("carrito").addEventListener("click", (e) => { if (e.target === $("carrito")) mostrarCarrito(false); });
 
