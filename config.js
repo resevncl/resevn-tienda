@@ -98,7 +98,7 @@ window.CONFIG = {
 
   // Píxeles de publicidad. Pega aquí el número de cada píxel para activarlo; "" = apagado.
   // meta: número del píxel de Meta (Facebook e Instagram). tiktok: código del píxel de TikTok.
-  medicion: { meta: "", tiktok: "" },
+  medicion: { meta: "1601540231706008", tiktok: "" },
 
   // Foto de cada marca en el inicio (opcional). Ej: { "Hellstar": "img/polera-hellstar-logo-negro-05.webp" }
   fotosMarca: {},
