@@ -76,7 +76,7 @@ window.CONFIG = {
     { p: "¿Cómo funciona la promo 2 x $49.990?",
       r: "Aplica al llevar 2 poleras de $26.990: pagas $49.990 por las dos, con envío gratis. Puedes combinar modelos, tallas y colores. Las poleras con otro precio no entran en la promoción." },
     { p: "¿Qué talla elijo?",
-      r: "Las poleras son de corte oversize y vienen en S, M, L y XL. En cada polera, la última foto es la guía de tallas con las medidas en centímetros. Si tienes dudas, escríbenos y te ayudamos a elegir." },
+      r: "Las poleras son de corte oversize y vienen en S, M, L y XL. Si prefieres un calce más ajustado, elige una talla menos que la que usas normalmente. En cada polera, la última foto es la guía de tallas con las medidas en centímetros. Si tienes dudas, escríbenos y te ayudamos a elegir." },
     { p: "¿Qué pasa si mi polera llega con una falla?",
       r: "Escríbenos apenas la recibas, con una foto, y lo solucionamos." },
     { p: "¿Tienes otra duda?",
@@ -95,6 +95,10 @@ window.CONFIG = {
   // Poleras destacadas en el inicio: lista de "id" de products.json.
   // Vacío = se elige sola una polera por marca.
   destacados: [],
+
+  // Píxeles de publicidad. Pega aquí el número de cada píxel para activarlo; "" = apagado.
+  // meta: número del píxel de Meta (Facebook e Instagram). tiktok: código del píxel de TikTok.
+  medicion: { meta: "", tiktok: "" },
 
   // Foto de cada marca en el inicio (opcional). Ej: { "Hellstar": "img/polera-hellstar-logo-negro-05.webp" }
   fotosMarca: {},

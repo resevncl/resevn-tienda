@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791937771">
+  <link rel="stylesheet" href="styles.css?v=1791938169">
 </head>
 <body>
 
@@ -31,7 +31,8 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1791937771"></script>
+  <script src="config.js?v=1791938169"></script>
+  <script src="medicion.js?v=1791938169"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -74,7 +75,14 @@
         $("avisar").hidden = false;
       }
       // Con el pago aprobado, el carrito ya no se necesita
-      if (estado === "approved") { try { localStorage.removeItem("resevn-carrito"); } catch (e) {} }
+      if (estado === "approved") {
+        try { localStorage.removeItem("resevn-carrito"); } catch (e) {}
+        // La compra se registra una sola vez, aunque se recargue esta página
+        try {
+          var ult = JSON.parse(localStorage.getItem("resevn-ultimo-pedido") || "null");
+          if (ult && ult.pedido === pedido && window.medir) { medir("compra", ult); localStorage.removeItem("resevn-ultimo-pedido"); }
+        } catch (e) {}
+      }
     })();
   </script>
 </body>

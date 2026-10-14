@@ -585,6 +585,7 @@
 
   function abrirDetalle(p) {
     enDetalle = { p, color: 0, talla: p.tallas.length === 1 ? p.tallas[0] : "" };
+    if (window.medir) medir("ver", { id: p.id, nombre: p.nombre, valor: Number(p.precio) || 0 });
     $("detalle-marca").textContent = p.marca || "";
     $("detalle-nombre").textContent = p.nombre;
     const precio = formatoPrecio(p.precio);
@@ -673,6 +674,7 @@
     else carrito.push({ id: p.id, color, talla, cant: 1 });
     guardarCarrito();
     pintarCarrito();
+    if (window.medir) medir("agregar", { id: p.id, nombre: p.nombre, valor: Number(p.precio) || 0 });
     return true;
   }
   // "Comprar ahora": agrega y abre el carrito para terminar la compra

@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791937771">
+  <link rel="stylesheet" href="styles.css?v=1791938169">
 </head>
 <body class="pagina-pago">
 
@@ -90,8 +90,9 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1791937771"></script>
-  <script src="comunas.js?v=1791937771"></script>
+  <script src="config.js?v=1791938169"></script>
+  <script src="medicion.js?v=1791938169"></script>
+  <script src="comunas.js?v=1791938169"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -114,6 +115,7 @@
       try { carrito = JSON.parse(localStorage.getItem("resevn-carrito") || "[]") || []; } catch (e) { carrito = []; }
       if (!Array.isArray(carrito)) carrito = [];
 
+      var resumen = null;
       function pintar(productos) {
         var ls = carrito.map(function (l) {
           var p = productos.find(function (x) { return x.id === l.id && x.visible !== false; });
@@ -154,6 +156,8 @@
           $("pago-envio-nota").textContent = "El envío es gratis en compras desde " + plata(ENVIO.gratisDesde) + (C.promo ? ": por ejemplo, llevando 2 poleras de " + plata(C.promo.precioUnidad) + " por " + plata(C.promo.precioPar) + "." : ".");
           $("pago-envio-nota").hidden = false;
         }
+        resumen = { valor: total, cantidad: ls.reduce(function (a, x) { return a + x.cant; }, 0), id: ls.map(function (x) { return x.p.id; }) };
+        if (window.medir) medir("pagar", resumen);
         $("pago-confirmar").textContent = "Pagar " + plata(total);
         $("pago-confirmar").dataset.texto = "Pagar " + plata(total);
         $("pago-columnas").hidden = false;
@@ -213,7 +217,10 @@
           }),
         }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, d: d }; }); })
           .then(function (x) {
-            if (x.ok && x.d.url) { location.href = x.d.url; return; }
+            if (x.ok && x.d.url) {
+              try { localStorage.setItem("resevn-ultimo-pedido", JSON.stringify({ pedido: x.d.pedido, valor: x.d.total, cantidad: resumen && resumen.cantidad, id: resumen && resumen.id })); } catch (e) {}
+              location.href = x.d.url; return;
+            }
             fallo(ERRORES[x.d.error] || "No pudimos iniciar el pago. Inténtalo de nuevo en un momento o escríbenos.");
           })
           .catch(function () { fallo("No pudimos conectar con el servicio de pago. Revisa tu conexión e inténtalo de nuevo."); });
