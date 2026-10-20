@@ -35,7 +35,6 @@
 
   // ---------- Datos de la tienda ----------
   const instagram = C.instagram.replace(/^@/, "");
-  const fono = C.whatsapp.replace(/\D/g, "");
   document.querySelectorAll("[data-tienda]").forEach((el) => (el.textContent = C.nombreTienda));
   if (C.logo) {
     $("logo-img").src = C.logo;
@@ -48,8 +47,7 @@
   }
   $("link-instagram").href = "https://instagram.com/" + instagram;
   $("link-instagram").textContent = "@" + instagram;
-  $("link-whatsapp").href = linkWhatsapp("");
-  $("link-whatsapp").textContent = "+" + fono.replace(/^(\d{2})(\d)(\d{4})(\d{4})$/, "$1 $2 $3 $4");
+  if ($("link-correo") && C.correo) { $("link-correo").href = "mailto:" + C.correo; $("link-correo").textContent = C.correo; }
   // Abre el chat directo (DM) de Instagram; Instagram no permite prellenar el mensaje
   $("detalle-instagram").href = "https://ig.me/m/" + instagram;
   $("detalle-guia").hidden = !C.guiaTallas;
@@ -647,7 +645,7 @@
     const v = p.variantes[color];
     const partes = [p.variantes.length > 1 ? "color " + v.color : "", talla ? "talla " + talla : ""].filter(Boolean);
     const consulta = p.nombre + (partes.length ? " (" + partes.join(", ") + ")" : "");
-    $("detalle-whatsapp").href = linkWhatsapp(C.mensajeWhatsapp.replace("{nombre}", consulta));
+    $("detalle-correo").href = "mailto:" + (C.correo || "") + "?subject=" + encodeURIComponent("Consulta: " + consulta);
   }
 
   // Elige un color: cambia las fotos, el texto "Color: X" y el mensaje de WhatsApp

@@ -7,7 +7,7 @@
   <meta name="description" content="Devoluciones, reembolsos, envíos, privacidad y términos y condiciones de RESEVN.">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1792460551">
+  <link rel="stylesheet" href="styles.css?v=1792502087">
 </head>
 <body>
 
@@ -31,7 +31,7 @@
 
     <section id="cambios">
       <h2>Devoluciones</h2>
-      <p>Si tienes un problema con tu compra, escríbenos por WhatsApp, Instagram o a contacto@resevn.cl indicando tu nombre y tu número de pedido.</p>
+      <p>Si tienes un problema con tu compra, escríbenos por Instagram o a contacto@resevn.cl indicando tu nombre y tu número de pedido.</p>
       <ul>
         <li><b>No hacemos cambios de talla.</b> Como trabajamos por encargo, no podemos cambiar una polera por otra talla. Revisa la guía de medidas de cada polera antes de comprar; si tienes dudas, escríbenos y te ayudamos a elegir.</li>
         <li><b>Derecho a retracto:</b> si te arrepientes de tu compra, puedes devolverla dentro de los 10 días corridos desde que la recibes. La polera debe estar sin uso, sin lavar y con sus etiquetas. Te devolvemos lo pagado por la polera.</li>
@@ -73,7 +73,7 @@
         <li>Para medir visitas y mostrar nuestra publicidad usamos herramientas de Meta (Facebook e Instagram) y TikTok, que pueden guardar cookies en tu navegador. No les entregamos tu nombre, correo, RUT ni dirección.</li>
         <li>Este sitio no tiene cuentas de usuario. El carrito se guarda solo en tu propio navegador.</li>
         <li>Si pagas en línea, el pago se procesa en Mercado Pago: este sitio no ve ni guarda los datos de tu tarjeta. A Mercado Pago le enviamos tu nombre, contacto y el detalle del pedido para gestionar el cobro.</li>
-        <li>Puedes pedirnos en cualquier momento que eliminemos tus datos escribiéndonos por WhatsApp o Instagram.</li>
+        <li>Puedes pedirnos en cualquier momento que eliminemos tus datos escribiéndonos a contacto@resevn.cl o por Instagram.</li>
       </ul>
     </section>
 
@@ -85,7 +85,7 @@
         <li><b>Pedidos:</b> un pedido queda confirmado cuando te respondemos con la disponibilidad y recibimos el pago acordado.</li>
         <li><b>Disponibilidad:</b> los productos son por encargo y están sujetos al stock del proveedor. Si un modelo, color o talla deja de estar disponible, te ofrecemos una alternativa o la devolución de lo pagado.</li>
         <li><b>Fotos y medidas:</b> las fotos son referenciales; los colores pueden variar levemente según la pantalla. Las medidas de la guía de tallas tienen una tolerancia de ±2 cm.</li>
-        <li><b>Contacto:</b> cualquier duda sobre estas políticas, escríbenos por <a class="enlace" id="link-whatsapp" target="_blank" rel="noopener">WhatsApp</a> o <a class="enlace" id="link-instagram" target="_blank" rel="noopener">Instagram</a>.</li>
+        <li><b>Contacto:</b> cualquier duda sobre estas políticas, escríbenos a <a class="enlace" href="mailto:contacto@resevn.cl">contacto@resevn.cl</a> o por <a class="enlace" id="link-instagram" target="_blank" rel="noopener">Instagram</a>.</li>
       </ul>
     </section>
   </main>
@@ -94,7 +94,7 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="./">Volver a la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1792460551"></script>
+  <script src="config.js?v=1792502087"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -103,7 +103,6 @@
         $("logo-img").src = C.logo; $("logo-img").hidden = false;
         if (C.logoComoInicial) { $("logo-texto").textContent = C.nombreTienda.slice(1); $("logo").setAttribute("aria-label", C.nombreTienda); }
       }
-      $("link-whatsapp").href = "https://wa.me/" + C.whatsapp.replace(/\D/g, "");
       $("link-instagram").href = "https://instagram.com/" + C.instagram.replace(/^@/, "");
       $("anio").textContent = new Date().getFullYear();
       document.title = C.nombreTienda + " — Políticas de la tienda";

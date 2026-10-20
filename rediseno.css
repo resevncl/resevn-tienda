@@ -213,7 +213,9 @@ body.tienda {
   grid-row: 3; font-family: var(--display); font-weight: 400; text-transform: uppercase;
   font-size: 44.2vw; line-height: .78; letter-spacing: -0.03em; white-space: nowrap;
   margin: 0 0 0 -0.04em; color: var(--suelo);
+  pointer-events: none;   /* la palabra gigante no debe tapar los links del pie */
 }
+.tienda .footer-cuerpo { position: relative; z-index: 1; }
 .tienda .footer-pie { grid-row: 4; border: 0; padding: 18px 0 0; margin: 0; text-align: left; font-family: var(--texto); font-size: var(--paso-chico); color: #4a4a4a; letter-spacing: 0; text-transform: none; }
 
 /* ---------- Detalle y carrito: paneles claros, con la tipografía de la marca ---------- */

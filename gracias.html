@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1792460551">
+  <link rel="stylesheet" href="styles.css?v=1792502087">
 </head>
 <body>
 
@@ -22,7 +22,7 @@
     <p id="mensaje"></p>
     <dl class="resultado-datos" id="datos" hidden></dl>
     <div class="resultado-botones">
-      <a class="boton boton-whatsapp" id="avisar" target="_blank" rel="noopener" hidden>Escribirnos por WhatsApp</a>
+      <a class="boton boton-oscuro" id="avisar" hidden>Escribirnos un correo</a>
       <a class="boton boton-borde" href="./" id="volver">Volver a la tienda</a>
     </div>
   </main>
@@ -31,8 +31,8 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1792460551"></script>
-  <script src="medicion.js?v=1792460551"></script>
+  <script src="config.js?v=1792502087"></script>
+  <script src="medicion.js?v=1792502087"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -71,7 +71,7 @@
 
       if (estado === "approved" || estado === "pending" || estado === "in_process") {
         var msj = "Hola! Hice una compra en " + C.nombreTienda + "." + (pedido ? " Pedido: " + pedido + "." : "") + (pago ? " Pago Mercado Pago: " + pago + "." : "") + " Tengo una consulta sobre mi pedido.";
-        $("avisar").href = "https://wa.me/" + C.whatsapp.replace(/\D/g, "") + "?text=" + encodeURIComponent(msj);
+        $("avisar").href = "mailto:" + (C.correo || "contacto@resevn.cl") + "?subject=" + encodeURIComponent("Mi pedido " + (pedido || "")) + "&body=" + encodeURIComponent(msj);
         $("avisar").hidden = false;
       }
       // Con el pago aprobado, el carrito ya no se necesita

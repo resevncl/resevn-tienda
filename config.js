@@ -14,8 +14,11 @@ window.CONFIG = {
   // Usuario de Instagram, sin el @
   instagram: "resevn.cl",
 
-  // Número de WhatsApp con código de país, sin + ni espacios (Chile: 569XXXXXXXX)
-  whatsapp: "56956638840",
+  // Correo de contacto que se muestra en la página (pie, fichas, políticas y página de gracias)
+  correo: "contacto@resevn.cl",
+
+  // WhatsApp: "" = no se muestra en ninguna parte. Solo se usaría si se apaga el pago en línea.
+  whatsapp: "",
 
   // Mensaje prellenado de WhatsApp. {nombre} se reemplaza por el nombre de la polera
   mensajeWhatsapp: "Hola! Quiero consultar por la polera: {nombre}",
@@ -81,7 +84,7 @@ window.CONFIG = {
     { p: "¿Qué pasa si mi polera llega con una falla?",
       r: "Escríbenos apenas la recibas, con una foto, y lo solucionamos." },
     { p: "¿Tienes otra duda?",
-      r: "Escríbenos por WhatsApp o Instagram con los botones de más abajo y te respondemos." },
+      r: "Escríbenos por Instagram a @resevn.cl o al correo contacto@resevn.cl y te respondemos." },
   ],
 
   // Fotos grandes del inicio (carrusel). Cada una: imagen, título, texto del botón y,
