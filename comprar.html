@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1792459731">
+  <link rel="stylesheet" href="styles.css?v=1792460551">
 </head>
 <body class="pagina-pago">
 
@@ -74,7 +74,7 @@
 
         <p class="detalle-error" id="pago-error" role="alert" hidden></p>
         <button class="boton boton-oscuro" id="pago-confirmar" type="submit">Pagar</button>
-        <p class="pago-nota">Al pagar aceptas las <a class="enlace" href="politicas.html" target="_blank" rel="noopener">políticas de la tienda</a>: cambios, devoluciones y envíos.</p>
+        <p class="pago-nota">Al pagar aceptas las <a class="enlace" href="politicas.html" target="_blank" rel="noopener">políticas de la tienda</a>: devoluciones y envíos.</p>
       </form>
 
       <aside class="pago-resumen" aria-labelledby="pago-resumen-titulo">
@@ -90,9 +90,9 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1792459731"></script>
-  <script src="medicion.js?v=1792459731"></script>
-  <script src="comunas.js?v=1792459731"></script>
+  <script src="config.js?v=1792460551"></script>
+  <script src="medicion.js?v=1792460551"></script>
+  <script src="comunas.js?v=1792460551"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -127,7 +127,8 @@
 
         var subtotal = ls.reduce(function (a, x) { return a + x.precio * x.cant; }, 0);
         var elegibles = ls.reduce(function (a, x) { return a + (C.promo && x.p.sinPromo !== true && x.precio === C.promo.precioUnidad ? x.cant : 0); }, 0);
-        var descuento = C.promo ? Math.floor(elegibles / 2) * Math.max(0, 2 * C.promo.precioUnidad - C.promo.precioPar) : 0;
+        var P = C.promo, enPacks = !P ? 0 : P.precioTrio ? Math.floor(elegibles / 3) * P.precioTrio + (elegibles % 3 === 2 ? P.precioPar : (elegibles % 3) * P.precioUnidad) : Math.floor(elegibles / 2) * P.precioPar + (elegibles % 2) * P.precioUnidad;
+        var descuento = P ? Math.max(0, elegibles * P.precioUnidad - enPacks) : 0;
         var gratis = !ENVIO || subtotal - descuento >= ENVIO.gratisDesde;
         var envio = gratis || !ENVIO ? 0 : ENVIO.costo;
         var total = subtotal - descuento + envio;
@@ -145,7 +146,7 @@
         var fila = function (dt, dd, clase) { var d = crear("div", clase || ""); d.append(crear("dt", "", dt), crear("dd", "", dd)); return d; };
         $("pago-totales").replaceChildren.apply($("pago-totales"), [
           fila("Subtotal", plata(subtotal)),
-          descuento ? fila("Promo 2 x " + plata(C.promo.precioPar), "−" + plata(descuento)) : null,
+          descuento ? fila("Promo por cantidad", "−" + plata(descuento)) : null,
           fila("Envío", gratis ? "Gratis" : plata(envio)),
           fila("Total", plata(total), "carrito-total"),
         ].filter(Boolean));
@@ -153,7 +154,7 @@
         $("pago-envio").textContent = gratis ? "Gratis" : plata(envio);
         $("pago-plazo").textContent = C.notaEntrega ? "Entrega estimada de 1 a 2 semanas" : "";
         if (ENVIO && !gratis) {
-          $("pago-envio-nota").textContent = "El envío es gratis en compras desde " + plata(ENVIO.gratisDesde) + (C.promo ? ": por ejemplo, llevando 2 poleras de " + plata(C.promo.precioUnidad) + " por " + plata(C.promo.precioPar) + "." : ".");
+          $("pago-envio-nota").textContent = "El envío es gratis llevando 2 poleras o más: 2 por " + plata(C.promo.precioPar) + (C.promo.precioTrio ? " o 3 por " + plata(C.promo.precioTrio) : "") + ".";
           $("pago-envio-nota").hidden = false;
         }
         resumen = { valor: total, cantidad: ls.reduce(function (a, x) { return a + x.cant; }, 0), id: ls.map(function (x) { return x.p.id; }) };

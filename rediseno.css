@@ -435,7 +435,15 @@ body.tienda {
 .par-total { margin-top: 30px; }
 
 /* Cambio de poleras en la portada */
-.par-polera img, .par-polera-nombre, .par-polera-marca { transition: opacity .26s var(--curva), transform .5s var(--curva), filter .26s var(--curva); }
+.par-polera img, .par-polera-nombre, .par-polera-marca { transition: opacity .17s var(--curva), transform .35s var(--curva), filter .17s var(--curva); }
 .par-polera.cambiando img { opacity: 0; transform: translateY(8px) scale(.97); filter: blur(2px); }
 .par-polera.cambiando .par-polera-nombre, .par-polera.cambiando .par-polera-marca { opacity: 0; }
 .par-polera-nombre { min-height: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* Tabla de precios de la portada: 1, 2 y 3 poleras */
+.portada-precios { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; }
+.portada-precios li { display: grid; gap: 2px; min-width: 96px; padding: 10px 14px; border: 1px solid rgba(255,255,255,.22); }
+.portada-precios li b { font-family: var(--display); font-weight: 400; font-size: 1.6rem; line-height: 1; letter-spacing: .02em; color: #fff; }
+.portada-precios li span { font-size: var(--paso-chico); color: #bdbdbd; }
+.portada-precios li.destacado { border-color: var(--acento); }
+.portada-precios li em { font-style: normal; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--acento); }

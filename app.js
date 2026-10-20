@@ -16,6 +16,13 @@
     precio === null || precio === undefined || precio === ""
       ? ""
       : "$" + Number(precio).toLocaleString("es-CL");
+  // Precio de n poleras en promoción: de a 3 (precioTrio) y el resto de a 2 (precioPar) o sueltas
+  const precioPromo = (n) => {
+    const P = C.promo;
+    if (P.precioTrio) return Math.floor(n / 3) * P.precioTrio + (n % 3 === 2 ? P.precioPar : (n % 3) * P.precioUnidad);
+    return Math.floor(n / 2) * P.precioPar + (n % 2) * P.precioUnidad;
+  };
+  const textoPromo = () => "2 por " + formatoPrecio(C.promo.precioPar) + (C.promo.precioTrio ? " · 3 por " + formatoPrecio(C.promo.precioTrio) : "");
 
   const miniatura = (ruta) => ruta.replace(/^img\//, "img/min/");
 
@@ -51,15 +58,15 @@
   // Cinta de la promo sobre el catálogo: deja claro que se puede combinar cualquier polera del precio en promo
   if (C.promo && $("cinta-promo")) {
     const cinta = $("cinta-promo");
-    cinta.append(crear("b", "", "2 × " + formatoPrecio(C.promo.precioPar)),
-      crear("span", "", "Combina cualquier par de poleras de " + formatoPrecio(C.promo.precioUnidad) + ": distintos modelos, marcas, tallas y colores." +
-        (C.envio && C.promo.precioPar >= C.envio.gratisDesde ? " Envío gratis." : "")));
+    cinta.append(crear("b", "", textoPromo()),
+      crear("span", "", "1 polera " + formatoPrecio(C.promo.precioUnidad) + ". Combina modelos, marcas, tallas y colores." +
+        (C.envio && C.promo.precioPar >= C.envio.gratisDesde ? " Envío gratis desde 2." : "")));
     cinta.hidden = false;
   }
 
   if (C.aviso) { $("aviso-promo").textContent = C.aviso; $("aviso-promo").hidden = false; }
 
-  // La promo 2x aplica solo a las poleras con el precio indicado en config.js
+  // La promo aplica solo a las poleras con el precio indicado en config.js
   const enPromo = (p) => !!C.promo && p.sinPromo !== true && Number(p.precio) === Number(C.promo.precioUnidad);
 
   // ---------- Reseñas y preguntas frecuentes ----------
@@ -380,7 +387,7 @@
     const subtotal = ls.reduce((a, x) => a + x.precio * x.l.cant, 0);
     const elegibles = ls.reduce((a, x) => a + (enPromo(x.p) ? x.l.cant : 0), 0);
     const pares = C.promo ? Math.floor(elegibles / 2) : 0;
-    const descuento = C.promo ? pares * Math.max(0, 2 * C.promo.precioUnidad - C.promo.precioPar) : 0;
+    const descuento = C.promo ? Math.max(0, elegibles * C.promo.precioUnidad - precioPromo(elegibles)) : 0;
     const productos = subtotal - descuento;
     const envioGratis = !ENVIO || productos >= ENVIO.gratisDesde;
     const envio = ls.length && ENVIO && !envioGratis ? ENVIO.costo : 0;
@@ -390,7 +397,7 @@
   function mensajePedido(t) {
     const filas = t.ls.map((x) => "• " + x.l.cant + " x " + x.p.nombre + (x.v && x.v.color ? " — " + x.v.color : "") + (x.l.talla ? " — talla " + x.l.talla : "") + (x.precio ? " (" + formatoPrecio(x.precio * x.l.cant) + ")" : ""));
     return ["Hola! Quiero hacer este pedido:", ...filas,
-      t.descuento ? "Promo 2 x " + formatoPrecio(C.promo.precioPar) + (t.pares > 1 ? " (" + t.pares + " pares)" : "") + ": −" + formatoPrecio(t.descuento) : "",
+      t.descuento ? "Promo (" + textoPromo() + "): −" + formatoPrecio(t.descuento) : "",
       ENVIO ? "Envío: " + (t.envioGratis ? "gratis" : formatoPrecio(t.envio)) : "",
       "Total: " + formatoPrecio(t.total)].filter(Boolean).join("\n");
   }
@@ -399,7 +406,7 @@
   function recomendadas(t) {
     const enCarrito = new Set(t.ls.map((x) => x.p.id));
     const marcasCarrito = new Set(t.ls.map((x) => x.p.marca));
-    const faltaPar = t.elegibles % 2 === 1;
+    const faltaPar = t.elegibles > 0 && t.elegibles % (C.promo && C.promo.precioTrio ? 3 : 2) !== 0;
     const puntaje = (p) => (faltaPar && enPromo(p) ? 2 : 0) + (marcasCarrito.has(p.marca) ? 1 : 0);
     return productos
       .filter((p) => !enCarrito.has(p.id) && Number(p.precio) > 0)
@@ -419,7 +426,7 @@
       const vacio = crear("div", "carrito-vacio");
       vacio.append(crear("p", "carrito-vacio-titulo", "Tu carrito está vacío"));
       const gancho = C.promo
-        ? "Lleva 2 poleras de " + formatoPrecio(C.promo.precioUnidad) + " por " + formatoPrecio(C.promo.precioPar) + (ENVIO && C.promo.precioPar >= ENVIO.gratisDesde ? " con envío gratis." : ".")
+        ? "1 polera " + formatoPrecio(C.promo.precioUnidad) + " · " + textoPromo() + (ENVIO && C.promo.precioPar >= ENVIO.gratisDesde ? ". Envío gratis desde 2." : ".")
         : ENVIO ? "Envío gratis en compras desde " + formatoPrecio(ENVIO.gratisDesde) + "." : "";
       if (gancho) vacio.append(crear("p", "", gancho));
       lista.replaceChildren(vacio);
@@ -467,12 +474,14 @@
     const barra = $("carrito-promo");
     barra.hidden = !t.ls.length || !(ENVIO || C.promo);
     if (!barra.hidden) {
-      const faltaPar = C.promo && t.elegibles % 2 === 1;
+      const n = C.promo ? t.elegibles : 0, ciclo = C.promo && C.promo.precioTrio ? 3 : 2;
+      const otra = C.promo ? formatoPrecio(precioPromo(n + 1) - precioPromo(n)) : "";
       let texto, avance;
-      if (ENVIO && t.envioGratis) { texto = "¡Felicidades! Tu pedido tiene envío gratis"; avance = 1; }
-      else if (faltaPar) { texto = "Agrega 1 polera de " + formatoPrecio(C.promo.precioUnidad) + " más: llevas 2 por " + formatoPrecio(C.promo.precioPar) + (ENVIO ? " con envío gratis" : ""); avance = ENVIO ? t.productos / ENVIO.gratisDesde : 0.5; }
-      else if (ENVIO) { texto = "Te faltan " + formatoPrecio(ENVIO.gratisDesde - t.productos) + " para el envío gratis"; avance = t.productos / ENVIO.gratisDesde; }
-      else { texto = "Promo 2 x " + formatoPrecio(C.promo.precioPar) + " aplicada"; avance = 1; }
+      if (n === 1) { texto = "Suma 1 polera más por " + otra + ": llevas 2 por " + formatoPrecio(C.promo.precioPar) + (ENVIO ? " con envío gratis" : ""); avance = 1 / ciclo; }
+      else if (n > 0 && n % ciclo === ciclo - 1 && C.promo.precioTrio) { texto = "Suma 1 más por solo " + otra + ": llevas 3 por " + formatoPrecio(C.promo.precioTrio); avance = (ciclo - 1) / ciclo; }
+      else if (n > 0 && n % ciclo !== 0) { texto = "Suma 1 polera más por solo " + otra; avance = (n % ciclo) / ciclo; }
+      else if (ENVIO && !t.envioGratis) { texto = "Te faltan " + formatoPrecio(ENVIO.gratisDesde - t.productos) + " para el envío gratis"; avance = t.productos / ENVIO.gratisDesde; }
+      else { texto = "¡Promo aplicada!" + (ENVIO ? " Tu pedido tiene envío gratis" : ""); avance = 1; }
       $("carrito-promo-texto").textContent = texto;
       $("carrito-barra").style.width = Math.round(Math.max(0.06, Math.min(1, avance)) * 100) + "%";
     }
@@ -481,7 +490,7 @@
     $("carrito-totales").hidden = !t.ls.length;
     $("carrito-totales").replaceChildren(...[
       t.descuento || ENVIO ? fila("Subtotal", formatoPrecio(t.subtotal)) : null,
-      t.descuento ? fila("Promo 2 x " + formatoPrecio(C.promo.precioPar), "−" + formatoPrecio(t.descuento)) : null,
+      t.descuento ? fila("Promo por cantidad", "−" + formatoPrecio(t.descuento)) : null,
       ENVIO && t.ls.length ? fila("Envío", t.envioGratis ? "Gratis" : formatoPrecio(t.envio)) : null,
       fila("Total", formatoPrecio(t.total), "carrito-total"),
     ].filter(Boolean));
@@ -540,7 +549,7 @@
           caja.querySelector(".par-polera-marca").textContent = p.marca || "";
           caja.classList.remove("cambiando");
           listo();
-        }, 260);
+        }, 170);
       };
       img.src = ruta;
     });
@@ -554,10 +563,10 @@
       if (pausa || document.hidden || $("portada").hidden) return;
       const a = siguiente(), b = siguiente(a);
       poner(cajas[0], a);
-      setTimeout(() => poner(cajas[1], b), 140);
+      setTimeout(() => poner(cajas[1], b), 90);
     };
     if (quieto) return;   // con "reducir movimiento" el par queda fijo
-    setInterval(cambiar, 3200);
+    setInterval(cambiar, 1700);
   }
 
   // ---------- Pago en línea ----------

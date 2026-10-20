@@ -26,15 +26,16 @@ window.CONFIG = {
   // Promoción 2x: aplica solo a las poleras cuyo precio es "precioUnidad"
   // (y que no tengan "sinPromo": true en products.json). null = sin promoción.
   promo: {
-    precioUnidad: 26990,
-    precioPar: 49990,   // lo que se paga por 2 poleras en promoción
-    etiqueta: "",   // texto sobre la foto en el catálogo, ej: "2 x $49.990". "" = sin etiqueta
-    detalle: "Promo: lleva 2 poleras de $26.990 por $49.990 · Envío gratis",
+    precioUnidad: 29990,
+    precioPar: 54990,   // lo que se paga por 2 poleras en promoción
+    precioTrio: 79990,  // lo que se paga por 3 poleras en promoción (null = solo promo de 2)
+    etiqueta: "",   // texto sobre la foto en el catálogo, ej: "2 x $54.990". "" = sin etiqueta
+    detalle: "2 por $54.990 · 3 por $79.990 · Envío gratis llevando 2 o más",
   },
 
   // Envío: se cobra "costo" cuando el total de poleras (ya con la promo) es menor que "gratisDesde".
   // null = no se muestra ni se cobra envío. Si cambias estos valores, cámbialos también en pagos/worker.js.
-  envio: { costo: 4990, gratisDesde: 49990 },
+  envio: { costo: 4990, gratisDesde: 54990 },
 
   // Pago en línea con Mercado Pago. "url" es la dirección del servicio de pagos
   // (ej: "https://pagos.resevn.cl"). Si se deja vacío (""), el sitio vuelve a vender solo por WhatsApp.
@@ -53,8 +54,8 @@ window.CONFIG = {
       texto: "Polera unisex de corte oversize. Mira todas las fotos para ver el estampado y los detalles, y revisa la guía de tallas antes de elegir." },
     { titulo: "Cuidado y lavado",
       texto: "Lávala del revés, con agua fría y en ciclo suave o a mano. No uses secadora ni cloro, y no planches sobre el estampado ni las aplicaciones." },
-    { titulo: "Envíos y cambios",
-      texto: "Despachamos a todo Chile. El envío cuesta $4.990 y es gratis en compras desde $49.990. Trabajamos por encargo: la entrega estimada es de 1 a 2 semanas. Tienes 10 días desde que la recibes para pedir un cambio de talla o devolución." },
+    { titulo: "Envíos y devoluciones",
+      texto: "Despachamos a todo Chile. El envío cuesta $4.990 y es gratis llevando 2 poleras o más. Trabajamos por encargo: la entrega estimada es de 1 a 2 semanas. No hacemos cambios de talla, así que revisa la guía de medidas antes de comprar. Si te arrepientes, tienes 10 días desde que la recibes para devolverla sin uso." },
   ],
 
   // Reseñas de clientes. Solo reseñas reales: copia lo que te escribió el cliente.
@@ -72,9 +73,9 @@ window.CONFIG = {
     { p: "¿Cuánto demora en llegar?",
       r: "Trabajamos por encargo. La entrega estimada es de 1 a 2 semanas desde que confirmas tu pedido." },
     { p: "¿Hacen envíos a todo Chile?",
-      r: "Sí, despachamos a todo Chile. El envío cuesta $4.990 y es gratis en compras desde $49.990; por ejemplo, llevando 2 poleras en promoción." },
-    { p: "¿Cómo funciona la promo 2 x $49.990?",
-      r: "Aplica al llevar 2 poleras de $26.990: pagas $49.990 por las dos, con envío gratis. Puedes combinar modelos, tallas y colores. Las poleras con otro precio no entran en la promoción." },
+      r: "Sí, despachamos a todo Chile. El envío cuesta $4.990 y es gratis llevando 2 poleras o más." },
+    { p: "¿Cuánto cuestan y cómo funciona la promo?",
+      r: "Todas las poleras cuestan lo mismo: 1 a $29.990, 2 por $54.990 y 3 por $79.990. Desde 2 poleras el envío es gratis. Puedes combinar modelos, marcas, tallas y colores, y si llevas más de 3 la promo se repite." },
     { p: "¿Qué talla elijo?",
       r: "Las poleras son de corte oversize y vienen en S, M, L y XL. Si prefieres un calce más ajustado, elige una talla menos que la que usas normalmente. En cada polera, la última foto es la guía de tallas con las medidas en centímetros. Si tienes dudas, escríbenos y te ayudamos a elegir." },
     { p: "¿Qué pasa si mi polera llega con una falla?",
