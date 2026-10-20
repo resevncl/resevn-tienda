@@ -6,3 +6,6 @@ registro/
 pagos/
 CLAUDE.md
 *.txt
+
+!robots.txt
+.taste-skill/

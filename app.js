@@ -29,7 +29,6 @@
   // ---------- Datos de la tienda ----------
   const instagram = C.instagram.replace(/^@/, "");
   const fono = C.whatsapp.replace(/\D/g, "");
-  document.title = C.nombreTienda + " — Catálogo";
   document.querySelectorAll("[data-tienda]").forEach((el) => (el.textContent = C.nombreTienda));
   if (C.logo) {
     $("logo-img").src = C.logo;
@@ -48,6 +47,15 @@
   $("detalle-instagram").href = "https://ig.me/m/" + instagram;
   $("detalle-guia").hidden = !C.guiaTallas;
   $("anio").textContent = new Date().getFullYear();
+
+  // Cinta de la promo sobre el catálogo: deja claro que se puede combinar cualquier polera del precio en promo
+  if (C.promo && $("cinta-promo")) {
+    const cinta = $("cinta-promo");
+    cinta.append(crear("b", "", "2 × " + formatoPrecio(C.promo.precioPar)),
+      crear("span", "", "Combina cualquier par de poleras de " + formatoPrecio(C.promo.precioUnidad) + ": distintos modelos, marcas, tallas y colores." +
+        (C.envio && C.promo.precioPar >= C.envio.gratisDesde ? " Envío gratis." : "")));
+    cinta.hidden = false;
+  }
 
   if (C.aviso) { $("aviso-promo").textContent = C.aviso; $("aviso-promo").hidden = false; }
 
@@ -79,6 +87,12 @@
   }
   if (C.preguntas && C.preguntas.length) {
     $("lista-preguntas").replaceChildren(...C.preguntas.map((q) => {
+      // En el rediseño las respuestas van siempre a la vista, como una tabla: pregunta a la izquierda, respuesta al lado
+      if (document.body.classList.contains("tienda")) {
+        const fila = crear("div", "pregunta-fila");
+        fila.append(crear("h3", "", q.p), crear("p", "", q.r));
+        return fila;
+      }
       const d = crear("details", "pregunta");
       d.append(crear("summary", "", q.p), crear("p", "", q.r));
       return d;
@@ -219,6 +233,9 @@
     $("aviso").hidden = true;
     const enInicio = vista.tipo === "inicio" && !busqueda;
     if (bannerListo) $("banner").hidden = !enInicio;
+    if ($("portada")) { $("portada").hidden = !enInicio; $("como-comprar").hidden = !enInicio; }
+    // La portada ya explica la promo: la cinta solo aparece al navegar marcas, "Todo" o una búsqueda
+    if ($("cinta-promo") && C.promo) $("cinta-promo").hidden = enInicio;
     $("resenas").hidden = !(enInicio && C.resenas && C.resenas.length);
     $("preguntas").hidden = !(enInicio && C.preguntas && C.preguntas.length);
 
@@ -286,6 +303,7 @@
   // ---------- Banner (carrusel) ----------
   let bannerListo = false;
   function pintarBanner() {
+    if (document.body.classList.contains("tienda")) return; // el rediseño usa la portada fija en vez del carrusel
     const laminas = (C.banners && C.banners.length ? C.banners : [{ imagen: C.bannerImagen || (productos[0] && productos[0].imagenes[0]), titulo: C.bannerTitulo, boton: C.bannerBoton }])
       .filter((b) => b && b.imagen);
     if (!laminas.length) return;
@@ -470,9 +488,76 @@
 
     const pedir = $("carrito-pedir");
     // Con pago en línea no se ofrece comprar por WhatsApp; sin él, es la única forma de pedir
+    pintarPar(t);
     pedir.hidden = !t.ls.length || conPago;
     if (t.ls.length) pedir.href = linkWhatsapp(mensajePedido(t));
     pasoCarrito();
+  }
+
+  // "Tu par" de la portada: se llena con las poleras en promoción que hay en el carrito
+  function pintarPar(t) {
+    if (!$("par") || !C.promo) return;
+    const enPar = t.elegibles % 2, pares = t.pares;
+    const puntos = $("par").querySelectorAll(".par-puntos span");
+    puntos.forEach((s, i) => s.classList.toggle("lleno", pares > 0 && !enPar ? true : i < enPar));
+    $("par").classList.toggle("completo", pares > 0 && !enPar);
+    const unidad = formatoPrecio(C.promo.precioUnidad), par = formatoPrecio(C.promo.precioPar);
+    $("par-texto").textContent = pares > 0 && !enPar
+      ? "Par completo: " + (pares > 1 ? pares + " pares a " : "") + par + (pares > 1 ? " cada uno" : "") + " con envío gratis."
+      : enPar
+        ? "Llevas 1. Suma otra polera de " + unidad + " y pagas " + par + " por las dos, con envío gratis."
+        : "Tu par: elige 2 poleras de " + unidad + " y pagas " + par + " con envío gratis.";
+  }
+
+  // ---------- Portada: el par de ejemplo va cambiando entre todas las poleras en promoción ----------
+  function rotarPar() {
+    const cajas = document.querySelectorAll(".par-polera");
+    if (cajas.length !== 2 || !C.promo) return;
+    const lista = productos.filter((p) => enPromo(p) && p.variantes[0] && p.variantes[0].imagenes[0]);
+    if (lista.length < 4) return;
+    const quieto = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Orden revuelto, y cada par siempre con dos marcas distintas
+    const mazo = lista.slice().sort(() => Math.random() - 0.5);
+    let i = 0;
+    const siguiente = (evitar) => {
+      for (let n = 0; n < mazo.length; n++) {
+        const p = mazo[i++ % mazo.length];
+        if (!evitar || p.marca !== evitar.marca) return p;
+      }
+      return mazo[i++ % mazo.length];
+    };
+    const poner = (caja, p) => new Promise((listo) => {
+      const ruta = p.variantes[0].imagenes[0];
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        caja.classList.add("cambiando");
+        setTimeout(() => {
+          const foto = caja.querySelector("img");
+          foto.src = ruta;
+          foto.alt = p.nombre;
+          caja.href = "#p=" + p.id;
+          caja.querySelector(".par-polera-nombre").textContent = nombreCorto(p);
+          caja.querySelector(".par-polera-marca").textContent = p.marca || "";
+          caja.classList.remove("cambiando");
+          listo();
+        }, 260);
+      };
+      img.src = ruta;
+    });
+    let pausa = false;
+    const zona = document.querySelector(".portada-par");
+    zona.addEventListener("mouseenter", () => (pausa = true));
+    zona.addEventListener("mouseleave", () => (pausa = false));
+    zona.addEventListener("focusin", () => (pausa = true));
+    zona.addEventListener("focusout", () => (pausa = false));
+    const cambiar = () => {
+      if (pausa || document.hidden || $("portada").hidden) return;
+      const a = siguiente(), b = siguiente(a);
+      poner(cajas[0], a);
+      setTimeout(() => poner(cajas[1], b), 140);
+    };
+    if (quieto) return;   // con "reducir movimiento" el par queda fijo
+    setInterval(cambiar, 3200);
   }
 
   // ---------- Pago en línea ----------
@@ -737,6 +822,18 @@
   });
   window.addEventListener("hashchange", ruta);
 
+  // Aparición suave de las secciones al entrar en pantalla (se omite con "reducir movimiento")
+  if (document.body.classList.contains("tienda") && "IntersectionObserver" in window &&
+      !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+    document.documentElement.classList.add("con-aparicion");
+    const vigia = new IntersectionObserver((entradas) => entradas.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("visible"); vigia.unobserve(e.target); }
+    }), { rootMargin: "0px 0px -10% 0px" });
+    const observar = () => document.querySelectorAll(".seccion:not(.visible), .paso:not(.visible), .extra:not(.visible)").forEach((el) => vigia.observe(el));
+    new MutationObserver(observar).observe($("secciones"), { childList: true });
+    observar();
+  }
+
   // ---------- Carga ----------
   fetch("products.json", { cache: "no-cache" })
     .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -751,6 +848,9 @@
             : [{ color: (p.colores || []).join(" / "), imagenes }];
           return { ...p, imagenes, tallas: p.tallas || [], variantes };
         });
+      document.querySelectorAll("[data-cuenta-poleras]").forEach((el) => (el.textContent = productos.length));
+      document.querySelectorAll("[data-cuenta-marcas]").forEach((el) => (el.textContent = marcas().length));
+      rotarPar();
       pintarBanner();
       pintarMenu();
       pintarGrilla();

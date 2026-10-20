@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /comprar.html
+Disallow: /gracias.html
+
+Sitemap: https://resevn.cl/sitemap.xml

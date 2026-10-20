@@ -3,14 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RESEVN — Poleras streetwear</title>
-  <meta name="description" content="Poleras streetwear por encargo con envío a todo Chile. Hellstar, Mixed Emotion, Life Hustlers, Valley Dreams y más.">
+  <title>RESEVN — Poleras streetwear importadas · 2 × $49.990 con envío gratis</title>
+  <meta name="description" content="Poleras streetwear oversize de Hellstar, Mixed Emotion, Life Hustlers, Valley Dreams y más. Lleva 2 por $49.990 con envío gratis a todo Chile. Paga con Mercado Pago.">
   <meta name="theme-color" content="#0a0a0a">
+  <link rel="canonical" href="https://resevn.cl/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RESEVN">
+  <meta property="og:title" content="RESEVN — Poleras streetwear · 2 × $49.990">
+  <meta property="og:description" content="Hellstar, Mixed Emotion, Life Hustlers y más. Envío gratis a todo Chile llevando 2.">
+  <meta property="og:url" content="https://resevn.cl/">
+  <meta property="og:image" content="https://resevn.cl/img/polera-mixed-emotion-angel-rezando-negro-06.webp">
+  <meta property="og:locale" content="es_CL">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/png" href="img/favicon.png">
   <link rel="apple-touch-icon" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1791938579">
+  <link rel="preload" as="font" type="font/woff2" href="fuentes/bebas-neue-latin-400-normal.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="fuentes/eb-garamond-latin-400-normal.woff2" crossorigin>
+  <link rel="preload" as="image" href="img/polera-mixed-emotion-alas-rojas-negro-01.webp" fetchpriority="high">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ClothingStore",
+    "name": "RESEVN",
+    "url": "https://resevn.cl/",
+    "logo": "https://resevn.cl/img/logo.png",
+    "image": "https://resevn.cl/img/polera-mixed-emotion-angel-rezando-negro-06.webp",
+    "description": "Tienda online de poleras streetwear oversize importadas, por encargo, con envío a todo Chile.",
+    "telephone": "+56956638840",
+    "priceRange": "$26.990 - $29.990",
+    "currenciesAccepted": "CLP",
+    "paymentAccepted": "Tarjeta de crédito, débito o prepago (Mercado Pago)",
+    "areaServed": { "@type": "Country", "name": "Chile" },
+    "address": { "@type": "PostalAddress", "addressCountry": "CL" },
+    "sameAs": ["https://instagram.com/resevn.cl"]
+  }
+  </script>
+  <link rel="stylesheet" href="styles.css?v=1792459731">
+  <link rel="stylesheet" href="rediseno.css?v=1792459731">
 </head>
-<body>
+<body class="tienda">
 
   <p class="aviso-promo" id="aviso-promo" hidden></p>
 
@@ -30,11 +61,47 @@
     <nav class="menu" id="menu" aria-label="Secciones"></nav>
     <form class="buscador" id="buscador" role="search" hidden>
       <input id="buscar" type="search" placeholder="Buscar polera o marca" aria-label="Buscar polera o marca" autocomplete="off">
-      <button type="button" id="cerrar-buscador" aria-label="Cerrar buscador">✕</button>
+      <button type="button" id="cerrar-buscador" aria-label="Cerrar buscador"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </form>
   </header>
 
   <main>
+    <section class="portada" id="portada" aria-labelledby="portada-titulo">
+      <div class="portada-texto">
+        <h1 class="portada-oferta" id="portada-titulo">Dos poleras,<br>$49.990</h1>
+        <p class="portada-frase">Elige cualquier par entre <span data-cuenta-poleras>46</span> diseños de <span data-cuenta-marcas>8</span> marcas importadas: mezcla modelos, tallas y colores. El envío a todo Chile va incluido.</p>
+        <div class="portada-acciones">
+          <a class="boton boton-acento" href="#todo">Comprar ahora</a>
+        </div>
+      </div>
+      <figure class="portada-par" aria-label="Ejemplo de un par en promoción">
+        <div class="par-poleras">
+          <a class="par-polera" href="#p=mlc4169461850">
+            <img src="img/polera-mixed-emotion-alas-rojas-negro-01.webp" width="1200" height="1200" alt="Polera negra Mixed Emotion Alas Rojas, con un ángel de alas rojas" fetchpriority="high">
+            <span class="par-polera-marca">Mixed Emotion</span>
+            <span class="par-polera-nombre">Alas Rojas</span>
+          </a>
+          <span class="par-mas" aria-hidden="true">+</span>
+          <a class="par-polera" href="#p=mlc3990361840-dilh002fh">
+            <img src="img/polera-life-hustlers-querubin-gris-01.webp" width="1200" height="1200" alt="Polera gris Life Hustlers Querubín, con un ángel rezando">
+            <span class="par-polera-marca">Life Hustlers</span>
+            <span class="par-polera-nombre">Querubín</span>
+          </a>
+        </div>
+        <figcaption class="par-total"><b>= $49.990</b> las dos, con envío gratis</figcaption>
+        <div class="par" id="par" aria-live="polite">
+          <div class="par-puntos" aria-hidden="true"><span></span><span></span></div>
+          <p id="par-texto">Tu par: elige 2 poleras de $26.990 y pagas $49.990 con envío gratis.</p>
+        </div>
+      </figure>
+      <p class="portada-nombre" aria-hidden="true"><span>RESEVN</span></p>
+      <ul class="portada-garantias">
+        <li>Paga con débito, crédito o prepago</li>
+        <li>Envío gratis a todo Chile</li>
+      </ul>
+
+    </section>
+
     <section class="banner" id="banner" aria-roledescription="carrusel" aria-label="Destacados" hidden>
       <div class="banner-pista" id="banner-pista"></div>
       <div class="banner-controles" id="banner-controles" hidden>
@@ -44,8 +111,27 @@
     </section>
 
     <section class="catalogo" id="catalogo">
+      <p class="cinta-promo" id="cinta-promo" hidden></p>
       <div id="secciones"></div>
       <p class="aviso" id="aviso" hidden></p>
+    </section>
+
+    <section class="pasos" id="como-comprar" aria-label="Cómo comprar">
+      <article class="paso">
+        <img src="img/polera-life-hustlers-astronauta-negro-06.webp" alt="" loading="lazy" width="1200" height="1200">
+        <h2 class="paso-verbo">Elige</h2>
+        <p class="paso-frase"><span data-cuenta-poleras>46</span> diseños de <span data-cuenta-marcas>8</span> marcas, en S, M, L y XL. La última foto de cada polera es la guía de tallas en centímetros.</p>
+      </article>
+      <article class="paso">
+        <img src="img/polera-life-hustlers-angel-rezando-beige-07.webp" alt="" loading="lazy" width="1200" height="1200">
+        <h2 class="paso-verbo">Paga</h2>
+        <p class="paso-frase">Con cualquier tarjeta de débito, crédito o prepago, de cualquier banco. El pago es seguro y nunca vemos los datos de tu tarjeta.</p>
+      </article>
+      <article class="paso">
+        <img src="img/polera-valley-dreams-ufo-negro-06.webp" alt="" loading="lazy" width="1200" height="1200">
+        <h2 class="paso-verbo">Recibe</h2>
+        <p class="paso-frase">Traemos tu polera por encargo y la despachamos a cualquier comuna de Chile en 1 a 2 semanas. Tienes 10 días para cambiar la talla.</p>
+      </article>
     </section>
 
     <section class="extra" id="resenas" hidden>
@@ -54,7 +140,7 @@
     </section>
 
     <section class="extra" id="preguntas" hidden>
-      <h2>Preguntas frecuentes</h2>
+      <h2>Preguntas</h2>
       <div class="preguntas" id="lista-preguntas"></div>
     </section>
   </main>
@@ -63,6 +149,7 @@
     <div class="footer-cuerpo">
       <div class="footer-col">
         <p class="footer-logo" data-tienda></p>
+        <p class="footer-titulo">Contacto</p>
         <p><b>Instagram:</b> <a id="link-instagram" target="_blank" rel="noopener"></a></p>
         <p><b>WhatsApp:</b> <a id="link-whatsapp" target="_blank" rel="noopener"></a></p>
         <p class="footer-nota" data-entrega hidden></p>
@@ -76,13 +163,14 @@
         <a href="politicas.html#terminos">Términos y condiciones</a>
       </nav>
     </div>
-    <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span></p>
+    <p class="footer-marca" aria-hidden="true">RESEVN</p>
+    <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · Poleras streetwear por encargo · Envíos a todo Chile</p>
   </footer>
 
   <!-- Detalle de producto -->
   <div class="detalle" id="detalle" role="dialog" aria-modal="true" aria-labelledby="detalle-nombre" hidden>
     <div class="detalle-caja">
-      <button class="detalle-cerrar" id="detalle-cerrar" aria-label="Cerrar">✕</button>
+      <button class="detalle-cerrar" id="detalle-cerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       <div class="detalle-galeria">
         <div class="detalle-fotos" id="detalle-fotos"></div>
         <button class="detalle-flecha detalle-flecha-izq" id="flecha-izq" type="button" aria-label="Foto anterior">&#8249;</button>
@@ -122,7 +210,7 @@
     <div class="carrito-panel">
       <div class="carrito-cabecera">
         <h2 id="carrito-titulo">Carrito</h2>
-        <button type="button" id="cerrar-carrito" aria-label="Cerrar carrito">✕</button>
+        <button type="button" id="cerrar-carrito" aria-label="Cerrar carrito"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       </div>
       <div class="carrito-promo" id="carrito-promo" hidden>
         <p id="carrito-promo-texto"></p>
@@ -145,8 +233,8 @@
     </div>
   </div>
 
-  <script src="config.js?v=1791938579"></script>
-  <script src="medicion.js?v=1791938579"></script>
-  <script src="app.js?v=1791938579"></script>
+  <script src="config.js?v=1792459731"></script>
+  <script src="medicion.js?v=1792459731"></script>
+  <script src="app.js?v=1792459731"></script>
 </body>
 </html>
