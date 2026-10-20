@@ -47,6 +47,10 @@ window.CONFIG = {
   // Plazo de entrega: se muestra en el detalle de cada polera y en el footer. "" = no mostrar.
   notaEntrega: "Productos por encargo · Entrega estimada de 2 a 3 semanas",
 
+  // Poleras en stock: se anotan en stock.json (id de products.json -> color -> tallas).
+  // Esas tallas muestran este texto en vez del plazo por encargo. Al venderse una, sácala de stock.json.
+  notaStock: "Entrega inmediata · Llega en 1 a 4 días hábiles",
+
   // Guía de tallas: se agrega sola como última foto de todas las poleras. null = no mostrar.
   guiaTallas: "img/guia-de-tallas.webp",
 
@@ -58,7 +62,7 @@ window.CONFIG = {
     { titulo: "Cuidado y lavado",
       texto: "Lávala del revés, con agua fría y en ciclo suave o a mano. No uses secadora ni cloro, y no planches sobre el estampado ni las aplicaciones." },
     { titulo: "Envíos y devoluciones",
-      texto: "Despachamos a todo Chile. El envío cuesta $4.990 y es gratis llevando 2 poleras o más. Trabajamos por encargo: la entrega estimada es de 2 a 3 semanas. No hacemos cambios de talla, así que revisa la guía de medidas antes de comprar. Si te arrepientes, tienes 10 días desde que la recibes para devolverla sin uso." },
+      texto: "Despachamos a todo Chile. El envío cuesta $4.990 y es gratis llevando 2 poleras o más. Las poleras con Entrega inmediata llegan en 1 a 4 días hábiles; el resto es por encargo, con entrega estimada de 2 a 3 semanas. No hacemos cambios de talla, así que revisa la guía de medidas antes de comprar. Si te arrepientes, tienes 10 días desde que la recibes para devolverla sin uso." },
   ],
 
   // Reseñas de clientes. Solo reseñas reales: copia lo que te escribió el cliente.
@@ -74,7 +78,7 @@ window.CONFIG = {
     { p: "¿Cómo compro?",
       r: "Elige tu polera, su talla y color, y toca “Comprar ahora”. Se abre tu carrito con el total y el envío: desde ahí finalizas tu compra. Si prefieres preguntar antes, usa los botones de consulta de cada polera." },
     { p: "¿Cuánto demora en llegar?",
-      r: "Trabajamos por encargo. La entrega estimada es de 2 a 3 semanas desde que confirmas tu pedido." },
+      r: "Las poleras marcadas como Entrega inmediata están en stock y llegan en 1 a 4 días hábiles. El resto lo traemos por encargo: la entrega estimada es de 2 a 3 semanas desde que confirmas tu pedido." },
     { p: "¿Hacen envíos a todo Chile?",
       r: "Sí, despachamos a todo Chile. El envío cuesta $4.990 y es gratis llevando 2 poleras o más." },
     { p: "¿Cuánto cuestan y cómo funciona la promo?",

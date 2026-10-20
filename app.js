@@ -2,6 +2,7 @@
   const C = window.CONFIG;
   const $ = (id) => document.getElementById(id);
   let productos = [];
+  let stock = {};           // stock.json: { id: { color: [tallas] } } = entrega inmediata
   // Vista del catálogo: "inicio" (marcas + destacados), "marca" (una marca) o "todo"
   let vista = { tipo: "inicio", marca: null };
   let hashVista = "";       // hash de la vista actual, para volver a ella al cerrar una polera
@@ -25,6 +26,11 @@
   const textoPromo = () => "2 por " + formatoPrecio(C.promo.precioPar) + (C.promo.precioTrio ? " · 3 por " + formatoPrecio(C.promo.precioTrio) : "");
 
   const miniatura = (ruta) => ruta.replace(/^img\//, "img/min/");
+
+  // Tallas en stock de una polera en un color (índice de variante); esas tienen entrega inmediata
+  const tallasStock = (p, ci) => ((stock[p.id] || {})[(p.variantes[ci] || {}).color] || []);
+  const hayStock = (p) => p.variantes.some((v, i) => tallasStock(p, i).length > 0);
+  const enStock = (p, ci, talla) => !!talla && tallasStock(p, ci).includes(talla);
 
   function crear(etiqueta, clase, texto) {
     const el = document.createElement(etiqueta);
@@ -137,6 +143,7 @@
       foto.append(img);
     });
     if (enPromo(p) && C.promo.etiqueta) foto.append(crear("span", "tarjeta-promo", C.promo.etiqueta));
+    if (hayStock(p)) foto.append(crear("span", "tarjeta-stock", "Entrega inmediata"));
     boton.append(foto);
     if (p.marca) boton.append(crear("p", "tarjeta-marca", p.marca));
     boton.append(crear("p", "tarjeta-nombre", nombreCorto(p)));
@@ -256,7 +263,9 @@
     } else if (vista.tipo === "todo") {
       $("secciones").replaceChildren(seccion("Todas las poleras", productos, { paginar: true }));
     } else {
-      $("secciones").replaceChildren(seccionMarcas(), seccion("Destacados", destacados(), { enlace: { texto: "Ver todo", href: "#todo" } }));
+      const listas = productos.filter(hayStock);
+      $("secciones").replaceChildren(...(listas.length ? [seccion("Entrega inmediata", listas)] : []),
+        seccionMarcas(), seccion("Destacados", destacados(), { enlace: { texto: "Ver todo", href: "#todo" } }));
     }
   }
 
@@ -436,7 +445,7 @@
         img.alt = "";
         const info = crear("div", "carrito-info");
         info.append(crear("p", "carrito-nombre", x.p.nombre));
-        info.append(crear("p", "carrito-detalle", [x.v && x.v.color, x.l.talla && "Talla " + x.l.talla].filter(Boolean).join(" · ")));
+        info.append(crear("p", "carrito-detalle", [x.v && x.v.color, x.l.talla && "Talla " + x.l.talla, enStock(x.p, x.l.color, x.l.talla) && "Entrega inmediata"].filter(Boolean).join(" · ")));
         const fila2 = crear("div", "carrito-cant");
         const boton = (texto, etiqueta, accion) => { const b = crear("button", "", texto); b.type = "button"; b.setAttribute("aria-label", etiqueta); b.addEventListener("click", accion); return b; };
         fila2.append(
@@ -657,6 +666,21 @@
     $("detalle-color-actual").textContent = v.color;
     $("detalle-colores").querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === indice)));
     actualizarConsulta();
+    pintarEntrega();
+  }
+
+  // Plazo bajo el botón: entrega inmediata si la talla elegida está en stock; si no, el plazo por encargo
+  function pintarEntrega() {
+    const el = document.querySelector(".detalle-entrega");
+    if (!el || !enDetalle) return;
+    const { p, color, talla } = enDetalle;
+    const ts = tallasStock(p, color);
+    $("detalle-tallas").querySelectorAll(".chips button").forEach((b) => b.classList.toggle("en-stock", ts.includes(b.textContent)));
+    el.textContent = enStock(p, color, talla) ? C.notaStock
+      : ts.length && !talla ? "Entrega inmediata en talla " + ts.join(" y ") + " · Otras tallas por encargo (2 a 3 semanas)"
+      : C.notaEntrega || "";
+    el.classList.toggle("detalle-entrega-stock", enStock(p, color, talla) || (ts.length > 0 && !talla));
+    el.hidden = !el.textContent;
   }
 
   // "Guía de tallas": lleva a la última foto de la galería
@@ -673,6 +697,7 @@
     $("detalle-tallas").querySelectorAll(".chips button").forEach((b) => b.setAttribute("aria-pressed", String(b.textContent === talla)));
     $("detalle-error").hidden = true;
     actualizarConsulta();
+    pintarEntrega();
   }
 
   function abrirDetalle(p) {
@@ -842,8 +867,11 @@
   }
 
   // ---------- Carga ----------
+  const cargarStock = fetch("stock.json", { cache: "no-cache" })
+    .then((r) => (r.ok ? r.json() : {})).catch(() => ({}));
   fetch("products.json", { cache: "no-cache" })
     .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then((datos) => cargarStock.then((s) => { stock = s || {}; return datos; }))
     .then((datos) => {
       productos = datos
         .filter((p) => p.visible !== false)

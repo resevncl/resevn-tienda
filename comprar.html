@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" type="image/png" href="img/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=1792503370">
+  <link rel="stylesheet" href="styles.css?v=1792513145">
 </head>
 <body class="pagina-pago">
 
@@ -90,9 +90,9 @@
     <p class="footer-pie">© <span id="anio"></span> <span data-tienda></span> · <a href="politicas.html">Políticas de la tienda</a></p>
   </footer>
 
-  <script src="config.js?v=1792503370"></script>
-  <script src="medicion.js?v=1792503370"></script>
-  <script src="comunas.js?v=1792503370"></script>
+  <script src="config.js?v=1792513145"></script>
+  <script src="medicion.js?v=1792513145"></script>
+  <script src="comunas.js?v=1792513145"></script>
   <script>
     (function () {
       var C = window.CONFIG, $ = function (id) { return document.getElementById(id); };
@@ -138,7 +138,7 @@
           var img = crear("img"); img.src = miniatura((x.v.imagenes && x.v.imagenes[0]) || x.p.imagenes[0]); img.alt = "";
           var info = crear("div", "carrito-info");
           info.append(crear("p", "carrito-nombre", x.p.nombre),
-            crear("p", "carrito-detalle", [x.v.color, x.l.talla && "Talla " + x.l.talla, "Cantidad " + x.cant].filter(Boolean).join(" · ")));
+            crear("p", "carrito-detalle", [x.v.color, x.l.talla && "Talla " + x.l.talla, "Cantidad " + x.cant, enStock(x) && "Entrega inmediata"].filter(Boolean).join(" · ")));
           fila.append(img, info, crear("p", "carrito-precio", plata(x.precio * x.cant)));
           return fila;
         }));
@@ -152,7 +152,9 @@
         ].filter(Boolean));
 
         $("pago-envio").textContent = gratis ? "Gratis" : plata(envio);
-        $("pago-plazo").textContent = C.notaEntrega ? "Entrega estimada de 2 a 3 semanas" : "";
+        // Si todo el pedido está en stock (stock.json) sale de inmediato; si no, va junto con lo que se encarga
+        $("pago-plazo").textContent = ls.every(enStock) && C.notaStock ? "Entrega inmediata: llega en 1 a 4 días hábiles"
+          : C.notaEntrega ? "Entrega estimada de 2 a 3 semanas" : "";
         if (ENVIO && !gratis) {
           $("pago-envio-nota").textContent = "El envío es gratis llevando 2 poleras o más: 2 por " + plata(C.promo.precioPar) + (C.promo.precioTrio ? " o 3 por " + plata(C.promo.precioTrio) : "") + ".";
           $("pago-envio-nota").hidden = false;
@@ -231,7 +233,11 @@
       window.addEventListener("pageshow", function () { var b = $("pago-confirmar"); b.disabled = false; if (b.dataset.texto) b.textContent = b.dataset.texto; });
 
       if (!carrito.length) { $("pago-vacio").hidden = false; return; }
-      fetch("products.json").then(function (r) { return r.json(); }).then(pintar)
+      var stock = {};
+      var enStock = function (x) { return ((stock[x.p.id] || {})[x.v.color] || []).indexOf(x.l.talla) >= 0; };
+      var cargarStock = fetch("stock.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+      fetch("products.json").then(function (r) { return r.json(); })
+        .then(function (d) { return cargarStock.then(function (s) { stock = s || {}; return d; }); }).then(pintar)
         .catch(function () { $("pago-vacio").textContent = "No pudimos cargar tu pedido. Recarga la página."; $("pago-vacio").hidden = false; });
     })();
   </script>

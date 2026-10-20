@@ -449,3 +449,9 @@ body.tienda {
 .portada-precios li span { font-size: var(--paso-chico); color: #bdbdbd; }
 .portada-precios li.destacado { border-color: var(--acento); }
 .portada-precios li em { font-style: normal; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--acento); }
+
+/* Entrega inmediata: poleras anotadas en stock.json */
+.tarjeta-stock { position: absolute; left: 8px; bottom: 8px; z-index: 1; background: #0a0a0a; color: #fff; font-family: var(--display); font-weight: 400; font-size: 1rem; letter-spacing: .04em; padding: 5px 8px 3px; border-left: 3px solid var(--acento); }
+.chips button.en-stock { position: relative; }
+.chips button.en-stock::after { content: ""; position: absolute; top: 5px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: var(--acento); }
+.tienda .detalle-entrega.detalle-entrega-stock, .detalle-entrega.detalle-entrega-stock { color: var(--acento); font-weight: 600; }
